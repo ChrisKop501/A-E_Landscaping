@@ -1,0 +1,167 @@
+/* =====================
+   STATS ROW
+   ===================== */
+
+.stats-row {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 2px solid var(--db-green-light);
+  border-radius: 14px;
+  padding: 18px 20px;
+  width: 190px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.stat-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6a9050;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--db-green-dark);
+}
+
+/* =====================
+   DASHBOARD GRID
+   ===================== */
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--db-green-dark);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* =====================
+   ACTION BOX
+   ===================== */
+
+.action-box {
+  background: var(--db-green-light);
+  border-radius: 12px;
+  margin-top: 18px;
+  padding: 16px;
+}
+
+.action-box h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--db-green-dark);
+  margin-bottom: 10px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.pill-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  border: none;
+  cursor: pointer;
+  background: var(--white);
+  color: var(--db-green-dark);
+  font-weight: 700;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pill-btn:hover {
+  background: var(--db-green-dark);
+  color: var(--white);
+}
+
+/* =====================
+   REVENUE CHART
+   ===================== */
+
+.chart-area {
+  background: var(--white);
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  height: 200px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  padding: 16px;
+  gap: 8px;
+}
+
+.chart-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+}
+
+.chart-bar {
+  width: 100%;
+  max-width: 40px;
+  background: var(--db-green-mid);
+  border-radius: 4px 4px 0 0;
+  transition: background 0.15s;
+}
+
+.chart-bar:hover { background: var(--db-green-dark); }
+
+.chart-label {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+}
+
+/* =====================
+   VIEW ALL BUTTON
+   ===================== */
+
+.view-all-btn {
+  margin-top: 12px;
+  padding: 8px 18px;
+  background: var(--db-green-dark);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.15s;
+}
+
+.view-all-btn:hover { background: #2e6318; }
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+
+@media (max-width: 700px) {
+  .dash-grid { grid-template-columns: 1fr; }
+  .stats-row { gap: 10px; }
+  .stat-card { width: 140px; }
+}

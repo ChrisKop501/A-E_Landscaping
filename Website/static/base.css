@@ -1,0 +1,124 @@
+/* =====================
+   BASE STYLES & VARIABLES
+   ===================== */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* A&E brand colors */
+  --ae-green:       #2d5a27;
+  --ae-green-light: #4a7c42;
+  --ae-green-pale:  #e8f0e6;
+  --ae-tan:         #f5f0e8;
+  --ae-border:      #d4cfc4;
+
+  /* Database system colors */
+  --db-green-light: #b8df9f;
+  --db-green-mid:   #7abb57;
+  --db-green-dark:  #3a7d20;
+  --db-bg:          #ececec;
+  --db-text:        #1a2e10;
+
+  --white: #ffffff;
+  --dark:  #1a1a1a;
+  --mid:   #555555;
+}
+
+body {
+  font-family: 'Nunito', 'Source Sans 3', Arial, sans-serif;
+  color: var(--dark);
+  background: var(--db-bg);
+  min-height: 100vh;
+}
+
+/* =====================
+   SHARED BUTTONS
+   ===================== */
+
+.btn-primary {
+  display: inline-block;
+  background: var(--db-green-dark);
+  color: var(--white);
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.btn-primary:hover { background: #2e6318; }
+
+.btn-secondary {
+  display: inline-block;
+  background: var(--db-green-mid);
+  color: var(--white);
+  padding: 10px 22px;
+  border-radius: 20px;
+  border: none;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+.btn-secondary:hover { background: #5ea040; }
+
+.btn-white {
+  display: inline-block;
+  background: var(--white);
+  color: var(--ae-green);
+  padding: 11px 24px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn-white:hover { background: #f0f0f0; }
+
+.btn-outline {
+  display: inline-block;
+  border: 1.5px solid rgba(255,255,255,0.55);
+  color: var(--white);
+  padding: 10px 24px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-size: 14px;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.08); }
+
+/* =====================
+   SHARED TABLE STYLES
+   ===================== */
+
+table {
+  width: 100%;
+  background: var(--white);
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background: var(--db-green-light);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* =====================
+   FADE-IN ANIMATION
+   ===================== */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Employees</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/pages.css"/>
+  <style>
+    /* ── Shared table styles ── */
+    .emp-section { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .emp-section h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; }
+    .emp-section .desc { font-size:13px; color:#888; margin-bottom:18px; line-height:1.5; }
+    .load-btn {
+      padding:10px 22px; background:#3a7d20; color:#fff; border:none;
+      border-radius:20px; font-size:13px; font-weight:700; cursor:pointer;
+      font-family:'Nunito',sans-serif; align-self:flex-end;
+    }
+    .load-btn:hover { background:#2e6318; }
+    .load-btn.grey { background:#888; }
+    .load-btn.grey:hover { background:#666; }
+    .results-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .results-table th { background:#b8df9f; color:#3a7d20; padding:10px 12px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .results-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; color:#333; }
+    .results-table tr:hover td { background:#f7fdf4; }
+    .results-wrap { border-radius:10px; overflow:hidden; border:1px solid #ddd; }
+    .no-results { color:#999; font-size:13px; padding:16px 0; text-align:center; }
+    .loading { color:#6a9050; font-size:13px; padding:12px 0; text-align:center; }
+    .avail-yes { background:#d4f0bb; color:#2e6318; padding:2px 10px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .money { font-weight:700; color:#3a7d20; }
+
+    /* ── Filter row ── */
+    .filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:16px; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; }
+    .filter-group label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#6a9050; }
+    .filter-group select, .filter-group input {
+      padding:9px 12px; border-radius:8px; border:1.5px solid #ccc;
+      font-size:14px; font-family:inherit; outline:none; min-width:140px;
+    }
+    .filter-group select:focus, .filter-group input:focus { border-color:#7abb57; }
+
+    /* ── Add Employee Form ── */
+    .emp-form { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .emp-form h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; }
+    .emp-form .desc { font-size:13px; color:#888; margin-bottom:20px; line-height:1.6; }
+    .emp-form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+    .emp-form-group { display:flex; flex-direction:column; gap:4px; }
+    .emp-form-group label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#6a9050; }
+    .emp-form-group input, .emp-form-group select {
+      padding:10px 12px; border-radius:8px; border:1.5px solid #ccc;
+      font-size:14px; font-family:inherit; outline:none; background:#fafafa;
+    }
+    .emp-form-group input:focus, .emp-form-group select:focus { border-color:#7abb57; background:#fff; }
+    .emp-form-actions { display:flex; gap:10px; margin-top:6px; }
+    .btn-save {
+      padding:11px 26px; background:#3a7d20; color:#fff; border:none;
+      border-radius:8px; font-size:14px; font-weight:700; cursor:pointer;
+      font-family:'Nunito',sans-serif; transition:background .15s;
+    }
+    .btn-save:hover { background:#2e6318; }
+    .btn-save:disabled { background:#aaa; cursor:not-allowed; }
+    .btn-reset {
+      padding:11px 20px; background:#eee; color:#555; border:none;
+      border-radius:8px; font-size:14px; font-weight:600; cursor:pointer;
+      font-family:'Nunito',sans-serif;
+    }
+    .btn-reset:hover { background:#e0e0e0; }
+
+    /* Confirmation card */
+    .emp-confirm { display:none; margin-top:16px; background:#d4f0bb; border:2px solid #7abb57; border-radius:10px; padding:16px 18px; }
+    .emp-confirm h4 { font-size:15px; font-weight:700; color:#2e6318; margin-bottom:10px; }
+    .emp-conf-chips { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:12px; }
+    .emp-chip { background:#fff; border-radius:8px; padding:10px 14px; text-align:center; min-width:110px; }
+    .emp-chip-label { font-size:10px; font-weight:700; text-transform:uppercase; color:#6a9050; margin-bottom:3px; }
+    .emp-chip-val { font-family:'Playfair Display',serif; font-size:18px; font-weight:700; color:#3a7d20; }
+    .btn-another {
+      padding:7px 16px; background:#3a7d20; color:#fff; border:none;
+      border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;
+      font-family:'Nunito',sans-serif;
+    }
+
+    /* Toast */
+    .toast {
+      position:fixed; bottom:24px; right:24px; background:#3a7d20; color:#fff;
+      padding:14px 22px; border-radius:10px; font-size:14px; font-weight:700;
+      box-shadow:0 4px 18px rgba(0,0,0,.18); z-index:999; display:none; max-width:340px;
+    }
+    .toast.error { background:#c0392b; }
+  </style>
+</head>
+<body>
+  <div class="top-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 0;">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+            <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <a href="/manager/clients" class="nav-btn">Clients</a>
+      <a href="/manager/estimates" class="nav-btn">Estimates</a>
+      <a href="/manager/contracts" class="nav-btn">Contracts</a>
+      <a href="/manager/billing" class="nav-btn">Billing</a>
+      <a href="/manager/reports" class="nav-btn">Reports</a>
+      <a href="/manager/employees"class="nav-btn active">Employees</a>
+      <a href="/manager/jobcosting" class="nav-btn">Job Costing</a>
+      <a href="/manager/home" class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="page-banner">
+    <div><h1>Employees</h1><p>Add new employees and view estimate assignments and available staff</p></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ══ ADD NEW EMPLOYEE FORM ══ -->
+    <div class="emp-form">
+      <h3>➕ Add New Employee</h3>
+      <p class="desc">
+        Fill out the form below and click <strong>Save to Employee Table</strong> to insert the new
+        employee directly into the <code>ae_landscaping</code> database. The employee will be set
+        to <strong>Active</strong> by default.
+      </p>
+
+      <div class="emp-form-row">
+        <div class="emp-form-group">
+          <label>Full Name <span style="color:#c0392b;">*</span></label>
+          <input type="text" id="new-emp-name" placeholder="e.g. Maria Gonzalez"/>
+        </div>
+        <div class="emp-form-group">
+          <label>Role / Position <span style="color:#c0392b;">*</span></label>
+          <select id="new-emp-role">
+            <option value="">— Select Role —</option>
+            <option value="Lead Landscaper">Lead Landscaper</option>
+            <option value="Estimator">Estimator</option>
+            <option value="Hauling Driver">Hauling Driver</option>
+            <option value="Sprinkler Tech">Sprinkler Tech</option>
+            <option value="General Crew">General Crew</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Office Staff">Office Staff</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="emp-form-row">
+        <div class="emp-form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="new-emp-phone" placeholder="(530) 000-0000"/>
+        </div>
+        <div class="emp-form-group">
+          <label>Email Address</label>
+          <input type="email" id="new-emp-email" placeholder="employee@example.com"/>
+        </div>
+      </div>
+
+      <div class="emp-form-actions">
+        <button class="btn-save" id="new-emp-btn" onclick="saveNewEmployee()">💾 Save to Employee Table</button>
+        <button class="btn-reset" onclick="clearEmployeeForm()">Clear</button>
+      </div>
+
+      <!-- Success confirmation -->
+      <div class="emp-confirm" id="emp-confirm">
+        <h4>✅ Employee Saved to ae_landscaping Database!</h4>
+        <div class="emp-conf-chips" id="emp-conf-chips"></div>
+        <button class="btn-another" onclick="clearEmployeeForm()">Add Another Employee</button>
+      </div>
+    </div>
+
+    <!-- ══ EMPLOYEES ASSIGNED TO ESTIMATES ══ -->
+    <div class="emp-section">
+      <h3>📋 Employees Assigned to Estimates</h3>
+      <p class="desc">Shows every estimate and the employee assigned to it. Filter by month, year, or a specific employee to narrow the results.</p>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Month</label>
+          <select id="ee-month">
+            <option value="">— All Months —</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Year</label>
+          <select id="ee-year">
+            <option value="">— All Years —</option>
+            <option value="2024">2024</option>
+            <option value="2025" selected>2025</option>
+            <option value="2026">2026</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Employee</label>
+          <select id="ee-employee">
+            <option value="">— All Employees —</option>
+          </select>
+        </div>
+        <button class="load-btn" onclick="loadEstimateEmployees()">Load Assignments</button>
+        <button class="load-btn grey" onclick="clearEEFilters()">Show All</button>
+      </div>
+      <div id="estimate-emp-results"></div>
+    </div>
+
+    <!-- ══ AVAILABLE SERVICE EMPLOYEES ══ -->
+    <div class="emp-section">
+      <h3>✅ Available Service Employees</h3>
+      <p class="desc">Lists all employees currently marked as active and available to perform service visits.</p>
+      <button class="load-btn" onclick="loadServiceEmployees(this)">Load Available Employees</button>
+      <div id="service-emp-results" style="margin-top:16px;"></div>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+  <div class="toast" id="toast"></div>
+
+<script>
+// ── TOAST ──────────────────────────────────────────────────────
+function showToast(msg, isError) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.style.display = 'block';
+  setTimeout(function() { t.style.display = 'none'; }, 4500);
+}
+
+// ── SAVE NEW EMPLOYEE → ae_landscaping.Employee table ──────────
+async function saveNewEmployee() {
+  var name  = document.getElementById('new-emp-name').value.trim();
+  var role  = document.getElementById('new-emp-role').value;
+  var phone = document.getElementById('new-emp-phone').value.trim();
+  var email = document.getElementById('new-emp-email').value.trim();
+
+  if (!name) {
+    showToast('Please enter the employee full name.', true);
+    return;
+  }
+  if (!role) {
+    showToast('Please select a role for this employee.', true);
+    return;
+  }
+
+  var btn = document.getElementById('new-emp-btn');
+  btn.disabled = true;
+  btn.textContent = 'Saving to database...';
+
+  var payload = {
+    employee_name:  name,
+    employee_role:  role,
+    employee_phone: phone,
+    employee_email: email
+  };
+
+  try {
+    var response = await fetch('/submit/employee', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload)
+    });
+
+    var contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      // Flask returned HTML (likely a redirect to /login)
+      showToast('Session issue — please refresh the page and try again.', true);
+      btn.disabled = false;
+      btn.textContent = 'Save to Employee Table';
+      return;
+    }
+
+    var res = await response.json();
+
+    btn.disabled = false;
+    btn.textContent = 'Save to Employee Table';
+
+    if (res.success) {
+      document.getElementById('emp-conf-chips').innerHTML =
+        '<div class="emp-chip">' +
+          '<div class="emp-chip-label">Employee ID</div>' +
+          '<div class="emp-chip-val">' + res.employee_id + '</div>' +
+        '</div>' +
+        '<div class="emp-chip">' +
+          '<div class="emp-chip-label">Name</div>' +
+          '<div class="emp-chip-val" style="font-size:14px;padding-top:4px;">' + res.employee_name + '</div>' +
+        '</div>' +
+        '<div class="emp-chip">' +
+          '<div class="emp-chip-label">Role</div>' +
+          '<div class="emp-chip-val" style="font-size:13px;padding-top:4px;">' + res.employee_role + '</div>' +
+        '</div>' +
+        '<div class="emp-chip">' +
+          '<div class="emp-chip-label">Status</div>' +
+          '<div class="emp-chip-val" style="font-size:13px;color:#2e6318;padding-top:4px;">Active</div>' +
+        '</div>';
+
+      document.getElementById('emp-confirm').style.display = 'block';
+      showToast('Employee ' + res.employee_name + ' (ID: ' + res.employee_id + ') saved to database!', false);
+
+      // Refresh employee dropdown so new hire appears in filters
+      loadEEDropdown();
+    } else {
+      showToast('Error: ' + res.message, true);
+    }
+
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'Save to Employee Table';
+    showToast('Network error: ' + err.message, true);
+  }
+}
+
+function clearEmployeeForm() {
+  document.getElementById('new-emp-name').value  = '';
+  document.getElementById('new-emp-role').value  = '';
+  document.getElementById('new-emp-phone').value = '';
+  document.getElementById('new-emp-email').value = '';
+  document.getElementById('emp-confirm').style.display = 'none';
+}
+
+// ── EMPLOYEE DROPDOWN (for filter) ─────────────────────────────
+async function loadEEDropdown() {
+  var emps = await fetch('/api/employees-list').then(function(r) { return r.json(); }).catch(function() { return []; });
+  var sel  = document.getElementById('ee-employee');
+  // Clear existing options except first
+  while (sel.options.length > 1) sel.remove(1);
+  emps.forEach(function(e) {
+    var o = document.createElement('option');
+    o.value = e.Employee_ID;
+    o.textContent = e.Employee_Name + ' — ' + (e.Employee_Role || 'No Role');
+    sel.appendChild(o);
+  });
+}
+
+function clearEEFilters() {
+  document.getElementById('ee-month').value    = '';
+  document.getElementById('ee-year').value     = '2025';
+  document.getElementById('ee-employee').value = '';
+  document.getElementById('estimate-emp-results').innerHTML = '';
+}
+
+// ── LOAD ESTIMATE ASSIGNMENTS ───────────────────────────────────
+async function loadEstimateEmployees() {
+  var month = document.getElementById('ee-month').value;
+  var year  = document.getElementById('ee-year').value;
+  var empId = document.getElementById('ee-employee').value;
+  var el    = document.getElementById('estimate-emp-results');
+  el.innerHTML = '<p class="loading">Loading...</p>';
+
+  var params = [];
+  if (month) params.push('month=' + month);
+  if (year)  params.push('year='  + year);
+  if (empId) params.push('employee_id=' + empId);
+  var url = '/api/estimate-employees' + (params.length ? '?' + params.join('&') : '');
+
+  var data = await fetch(url).then(function(r) { return r.json(); }).catch(function() { return []; });
+
+  if (!data.length) {
+    el.innerHTML = '<p class="no-results">No estimate records found for those filters.</p>';
+    return;
+  }
+
+  var MONTHS = ['','January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+  var label = (month ? MONTHS[parseInt(month)] + ' ' : '') + (year || 'All Years');
+
+  var html = '<div style="font-size:12px;color:#6a9050;font-weight:700;margin-bottom:10px;">' +
+    'Showing ' + data.length + ' estimate' + (data.length !== 1 ? 's' : '') + ' — ' + label +
+    '</div>';
+
+  html += '<div class="results-wrap"><table class="results-table"><thead><tr>' +
+    '<th>Est. ID</th><th>Client</th><th>Address</th><th>Service Description</th>' +
+    '<th>Est. Cost</th><th>Hours</th><th>Date</th><th>Assigned Employee</th><th>Role</th>' +
+    '</tr></thead><tbody>';
+
+  data.forEach(function(r) {
+    html += '<tr>' +
+      '<td>' + r.Estimate_ID + '</td>' +
+      '<td><strong>' + (r.Client_Name || '') + '</strong></td>' +
+      '<td>' + (r.Property_Address || '') + '</td>' +
+      '<td>' + (r.Service_Description || '') + '</td>' +
+      '<td class="money">$' + parseFloat(r.Estimated_Cost || 0).toLocaleString('en-US', {minimumFractionDigits:2}) + '</td>' +
+      '<td>' + (r.Estimated_Labor_Hours || 0) + 'h</td>' +
+      '<td>' + (r.Estimate_Date || '') + '</td>' +
+      '<td>' + (r.Employee_Name ? '<strong>' + r.Employee_Name + '</strong>' : '<span style="color:#bbb;">Unassigned</span>') + '</td>' +
+      '<td>' + (r.Employee_Role || '—') + '</td>' +
+    '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+// ── LOAD AVAILABLE SERVICE EMPLOYEES ───────────────────────────
+async function loadServiceEmployees(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Loading...';
+  var el   = document.getElementById('service-emp-results');
+  var data = await fetch('/api/service-employees').then(function(r) { return r.json(); }).catch(function() { return []; });
+  btn.disabled = false;
+  btn.textContent = 'Load Available Employees';
+
+  if (!data.length) {
+    el.innerHTML = '<p class="no-results">No available employees found.</p>';
+    return;
+  }
+
+  var html = '<div class="results-wrap"><table class="results-table"><thead><tr>' +
+    '<th>ID</th><th>Name</th><th>Role</th><th>Phone</th><th>Email</th><th>Status</th>' +
+    '</tr></thead><tbody>';
+
+  data.forEach(function(r) {
+    html += '<tr>' +
+      '<td>' + r.Employee_ID + '</td>' +
+      '<td><strong>' + r.Employee_Name + '</strong></td>' +
+      '<td>' + (r.Employee_Role || '—') + '</td>' +
+      '<td>' + (r.Employee_Phone || '—') + '</td>' +
+      '<td>' + (r.Employee_Email || '—') + '</td>' +
+      '<td><span class="avail-yes">Active</span></td>' +
+    '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+// ── INIT ────────────────────────────────────────────────────────
+loadEEDropdown();
+</script>
+</body>
+</html>

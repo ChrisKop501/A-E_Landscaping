@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A &amp; E Landscaping – Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --green:#2d5a27;--green-mid:#4a7c42;--green-light:#7abb57;
+      --green-pale:#e8f5e2;--tan:#f7f3ed;--border:#ddd;
+      --dark:#1a1a1a;--mid:#555;--white:#fff;
+    }
+    body{font-family:'Source Sans 3',sans-serif;color:var(--dark);background:#fff}
+
+    /* TOPBAR */
+    .topbar{background:#1c3a18;padding:8px 2rem;text-align:center;font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.06em;text-transform:uppercase}
+    .topbar a{color:rgba(255,255,255,.85);text-decoration:none;margin:0 10px}
+    .topbar a:hover{color:#fff}
+
+    /* NAV */
+    .nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;min-height:64px;gap:1rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+    .nav-logo{color:#fff;font-family:'Playfair Display',serif;font-size:19px;font-weight:700;text-decoration:none;line-height:1.2}
+    .nav-logo span{display:block;font-size:11px;font-weight:300;opacity:.75;letter-spacing:.04em}
+    .nav-links{display:flex;gap:1.6rem;list-style:none}
+    .nav-links a{color:rgba(255,255,255,.85);text-decoration:none;font-size:14px;font-weight:600;transition:color .15s}
+    .nav-links a:hover,.nav-links a.active{color:#fff}
+    .nav-links a.active{border-bottom:2px solid rgba(255,255,255,.5);padding-bottom:2px}
+    .nav-contact{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+    .nav-contact a{color:rgba(255,255,255,.85);font-size:13px;text-decoration:none}
+    .nav-contact a:hover{color:#fff}
+    .btn-login{display:inline-block;margin-top:4px;padding:5px 14px;background:rgba(255,255,255,.15);color:#fff!important;border:1px solid rgba(255,255,255,.35);border-radius:20px;font-size:12px;font-weight:700;text-decoration:none}
+    .btn-login:hover{background:rgba(255,255,255,.25)!important}
+
+    /* PAGE HEADER — full bleed with the hero yard photo */
+    .page-header{
+      position:relative;
+      height:340px;
+      overflow:hidden;
+    }
+    .page-header img{
+      width:100%;height:100%;object-fit:cover;display:block;
+      object-position:center 60%;
+      filter:brightness(.45);
+    }
+    .page-header-overlay{
+      position:absolute;inset:0;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      text-align:center;padding:2rem;
+    }
+    .page-header-overlay .eyebrow{
+      font-size:12px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.14em;color:var(--green-light);margin-bottom:12px;
+    }
+    .page-header-overlay h1{
+      font-family:'Playfair Display',serif;
+      font-size:3rem;color:#fff;
+      margin-bottom:.8rem;line-height:1.15;
+    }
+    .page-header-overlay p{
+      font-size:15px;color:rgba(255,255,255,.82);
+      max-width:520px;line-height:1.7;
+    }
+
+    /* INTRO STRIP */
+    .intro-strip{
+      background:var(--green);
+      padding:1.4rem 2rem;
+      text-align:center;
+    }
+    .intro-strip p{font-size:14px;color:rgba(255,255,255,.85);font-weight:600;line-height:1.6}
+
+    /* GALLERY GRID */
+    .gallery-body{padding:3.5rem 2rem;background:#fff;max-width:1060px;margin:0 auto}
+
+    .gallery-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(460px,1fr));
+      gap:2.4rem;
+    }
+
+    /* Each photo card */
+    .photo-card{
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 4px 22px rgba(0,0,0,.10);
+      background:#fff;
+      border:1px solid var(--border);
+      transition:transform .2s,box-shadow .2s;
+      display:flex;
+      flex-direction:column;
+    }
+    .photo-card:hover{
+      transform:translateY(-5px);
+      box-shadow:0 12px 36px rgba(45,90,39,.18);
+    }
+
+    .photo-card img{
+      width:100%;
+      height:280px;
+      object-fit:cover;
+      display:block;
+    }
+
+    /* Wide featured card spans full width */
+    .photo-card.featured{
+      grid-column:1/-1;
+    }
+    .photo-card.featured img{
+      height:380px;
+    }
+
+    .photo-card-body{
+      padding:18px 20px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .photo-card-tag{
+      display:inline-block;
+      background:var(--green-pale);
+      color:var(--green);
+      font-size:10px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.07em;
+      padding:3px 10px;
+      border-radius:10px;
+      align-self:flex-start;
+    }
+    .photo-card-body h3{
+      font-family:'Playfair Display',serif;
+      font-size:17px;
+      color:var(--dark);
+      line-height:1.3;
+    }
+    .photo-card-body p{
+      font-size:13px;
+      color:var(--mid);
+      line-height:1.65;
+      margin-top:2px;
+    }
+
+    /* Section divider label */
+    .section-label{
+      font-family:'Playfair Display',serif;
+      font-size:1.5rem;
+      color:var(--green);
+      margin-bottom:1.6rem;
+      padding-bottom:.6rem;
+      border-bottom:3px solid var(--green-light);
+    }
+
+    /* CTA SECTION */
+    .cta-section{
+      background:var(--green);
+      padding:3rem 2rem;
+      text-align:center;
+    }
+    .cta-section h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff;margin-bottom:.8rem}
+    .cta-section p{font-size:14px;color:rgba(255,255,255,.8);margin-bottom:1.5rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.7}
+    .btn-cta{display:inline-block;background:#fff;color:var(--green);padding:13px 30px;border-radius:4px;font-size:14px;font-weight:700;text-decoration:none;margin:0 6px}
+    .btn-cta:hover{background:#f0f0f0}
+    .btn-cta-outline{background:transparent;border:2px solid rgba(255,255,255,.55);color:#fff;padding:12px 28px;border-radius:4px;font-size:14px;text-decoration:none;display:inline-block;margin:0 6px}
+    .btn-cta-outline:hover{background:rgba(255,255,255,.1)}
+
+    /* FOOTER */
+    .footer-wrap{background:var(--green)}
+    .footer{padding:2.5rem 2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;max-width:960px;margin:0 auto}
+    .footer h4{font-family:'Playfair Display',serif;color:#fff;font-size:1rem;margin-bottom:1rem;line-height:1.4}
+    .footer ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+    .footer li,.footer a{font-size:13px;color:rgba(255,255,255,.7);text-decoration:none}
+    .footer a:hover{color:#fff}
+    .social-links{display:flex;gap:.8rem;margin-top:.8rem}
+    .social-links a{font-size:12px;color:rgba(255,255,255,.75);background:rgba(255,255,255,.1);padding:5px 12px;border-radius:4px;text-decoration:none}
+    .social-links a:hover{background:rgba(255,255,255,.18);color:#fff}
+    .footer-bottom{background:#1c3a18;padding:14px 2rem;text-align:center;font-size:12px;color:rgba(255,255,255,.4)}
+
+    @media(max-width:700px){
+      .gallery-grid{grid-template-columns:1fr}
+      .photo-card.featured img,.photo-card img{height:220px}
+      .page-header{height:240px}
+      .page-header-overlay h1{font-size:2rem}
+      .footer{grid-template-columns:1fr}
+      .nav-links{display:none}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    📞 <a href="tel:15307109500">1 (530) 710-9500</a>
+    &nbsp;|&nbsp; Call or Text for a FREE Estimate &nbsp;|&nbsp; Redding, CA
+  </div>
+
+  <nav class="nav">
+    <a class="nav-logo" href="/">
+      A &amp; E Landscaping and Hauling
+      <span>Redding, CA &amp; Surrounding Areas</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/gallery" class="active">Gallery</a></li>
+      <li><a href="/employee-portal">Employee Portal</a></li>
+    </ul>
+    <div class="nav-contact">
+      <a href="tel:15307109500">1 (530) 710-9500</a>
+      <a href="mailto:contact@aelandscape.net">contact@aelandscape.net</a>
+      <a href="/login" class="btn-login">Manager Login</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HEADER — uses the uploaded front yard hero photo -->
+  <div class="page-header">
+    <img src="/css/images/yard-hero.jpg" alt="Beautifully landscaped front yard"/>
+    <div class="page-header-overlay">
+      <div class="eyebrow">A &amp; E Landscaping and Hauling</div>
+      <h1>Our Work</h1>
+      <p>A look at the yards, lawns, and properties we've transformed for clients across Redding and surrounding areas.</p>
+    </div>
+  </div>
+
+  <div class="intro-strip">
+    <p>🌿 We take pride in every yard we touch — from routine maintenance to full transformations. Here's what we've been up to.</p>
+  </div>
+
+  <!-- GALLERY BODY -->
+  <div class="gallery-body">
+
+    <div class="section-label">Recent Projects</div>
+
+    <div class="gallery-grid">
+
+      <!-- Image 1 — Front yard lawn restoration side-by-side -->
+      <div class="photo-card featured">
+        <img src="/css/images/gallery-1.jpg" alt="Front yard lawn restoration — before and after"/>
+        <div class="photo-card-body">
+          <span class="photo-card-tag">Lawn Restoration</span>
+          <h3>Front Yard Lawn Restoration</h3>
+          <p>A patchy, struggling front lawn brought back to full, lush green coverage. We treated the soil, overseeded the bare patches, and maintained the property on a regular schedule until the lawn was fully restored. The difference in curb appeal is dramatic.</p>
+        </div>
+      </div>
+
+      <!-- Image 2 — Backyard lawn renovation -->
+      <div class="photo-card">
+        <img src="/css/images/gallery-2.jpg" alt="Backyard lawn renovation — before and after"/>
+        <div class="photo-card-body">
+          <span class="photo-card-tag">Backyard Renovation</span>
+          <h3>Backyard Lawn Renovation</h3>
+          <p>This sloped backyard had almost no grass coverage — just bare soil and scattered weeds. After aeration, seeding, and a few months of care, the backyard grew in thick and green, transforming an unusable space into a proper yard.</p>
+        </div>
+      </div>
+
+      <!-- Image 3 — Gutter / eavetrough cleaning -->
+      <div class="photo-card">
+        <img src="/css/images/gallery-3.jpg" alt="Gutter and eavetrough cleaning"/>
+        <div class="photo-card-body">
+          <span class="photo-card-tag">Clean Up</span>
+          <h3>Gutter &amp; Debris Clean Up</h3>
+          <p>Gutters and eavetroughs packed with pine needles, leaves, and debris — completely cleared and flowing cleanly. Part of our seasonal clean-up services that keep your property protected from water damage and looking well-maintained year-round.</p>
+        </div>
+      </div>
+
+      <!-- Image 4 — Full front yard mow and cleanup -->
+      <div class="photo-card featured">
+        <img src="/css/images/gallery-4.jpg" alt="Overgrown front yard mowed and cleaned up"/>
+        <div class="photo-card-body">
+          <span class="photo-card-tag">Yard Maintenance</span>
+          <h3>Overgrown Front Yard — Full Clean Up</h3>
+          <p>An overgrown, weedy front yard brought back to order in a single visit. Tall grass and weeds mowed down, beds edged, and the entire property tidied up. This is the kind of one-day transformation we specialize in — especially for rental properties and homes that have gotten out of hand.</p>
+        </div>
+      </div>
+
+      <!-- Image 5 — Garden bed planting and landscaping install -->
+      <div class="photo-card featured">
+        <img src="/css/images/gallery-5.jpg" alt="New garden bed installation and planting"/>
+        <div class="photo-card-body">
+          <span class="photo-card-tag">Landscaping Install</span>
+          <h3>Front Yard Garden Bed Installation</h3>
+          <p>A bare, unfinished front yard transformed with a full garden bed installation. New plants, shrubs, mulch, and a centerpiece tree were installed to create a welcoming, polished look. From a construction-site appearance to a finished, colorful landscape that adds real value to the home.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <h2>Want Results Like These?</h2>
+    <p>Call us or submit an estimate request — we'll come take a look at your property and give you a free quote with no obligation.</p>
+    <a href="tel:15307109500" class="btn-cta">📞 Call (530) 710-9500</a>
+    <a href="/" class="btn-cta-outline">Request a Free Estimate →</a>
+  </section>
+
+  <!-- FOOTER -->
+  <div class="footer-wrap">
+    <div class="footer">
+      <div>
+        <h4>A &amp; E Landscaping<br>and Hauling</h4>
+        <p style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:10px;line-height:1.6;">Serving Redding, CA and surrounding areas.</p>
+        <div class="social-links">
+          <a href="https://facebook.com/aehauling" target="_blank">Facebook</a>
+          <a href="https://www.yelp.com/biz/a-and-e-landscape-and-hauling-redding-4" target="_blank">Yelp</a>
+        </div>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <ul>
+          <li>Yard Maintenance – Full Year</li>
+          <li>Fall and Spring Clean Ups</li>
+          <li>Sprinkler Repairs</li>
+          <li>Lot Clearing</li>
+          <li>Defensible Space Clearing</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="tel:15307109500">1 (530) 710-9500</a></li>
+          <li><a href="mailto:contact@aelandscape.net">contact@aelandscape.net</a></li>
+          <li style="margin-top:10px;"><a href="/employee-portal" style="color:rgba(255,255,255,.4);font-size:12px;">Employee Portal</a></li>
+          <li><a href="/login" style="color:rgba(255,255,255,.4);font-size:12px;">Manager Login</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">Copyright &copy; 2026 A &amp; E Landscaping and Hauling. All rights reserved.</div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Estimates</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/pages.css"/>
+  <style>
+    /* Card wrapper */
+    .est-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #ddd;
+      padding: 24px;
+      margin-bottom: 28px;
+    }
+    .est-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      color: #3a7d20;
+      margin-bottom: 6px;
+    }
+    .est-card .desc {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    /* Cost preview bar */
+    .cost-preview {
+      background: #f0f9ea;
+      border: 1.5px solid #b8df9f;
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .cost-item { text-align: center; }
+    .cost-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #6a9050; margin-bottom: 4px; }
+    .cost-value { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #3a7d20; }
+
+    /* Table */
+    .results-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .results-table th { background: #b8df9f; color: #3a7d20; padding: 10px 12px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+    .results-table td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; color: #333; }
+    .results-table tr:hover td { background: #f7fdf4; }
+    .results-wrap { border-radius: 10px; overflow: hidden; border: 1px solid #ddd; }
+    .money { font-weight: 700; color: #3a7d20; }
+    .totals-row td { background: #f0f9ea; font-weight: 700; }
+
+    /* Filter row */
+    .filter-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: flex-end; }
+    .filter-group { display: flex; flex-direction: column; gap: 4px; }
+    .filter-group label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #6a9050; }
+    .filter-group select, .filter-group input {
+      padding: 9px 12px; border-radius: 8px; border: 1.5px solid #ccc;
+      font-size: 13px; font-family: inherit; outline: none; min-width: 180px;
+    }
+    .filter-group select:focus, .filter-group input:focus { border-color: #7abb57; }
+
+    /* Buttons */
+    .load-btn { padding: 10px 22px; background: #3a7d20; color: #fff; border: none; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; align-self: flex-end; }
+    .load-btn:hover { background: #2e6318; }
+    .no-results { color: #999; font-size: 13px; padding: 16px 0; text-align: center; }
+    .loading { color: #6a9050; font-size: 13px; padding: 12px 0; text-align: center; }
+
+    /* Toast */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #3a7d20; color: #fff; padding: 14px 22px; border-radius: 10px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 18px rgba(0,0,0,0.18); z-index: 999; display: none; max-width: 360px; }
+    .toast.error { background: #c0392b; }
+
+    /* Summary chips */
+    .chip-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .chip { background: #f0f9ea; border: 1.5px solid #b8df9f; border-radius: 10px; padding: 12px 18px; flex: 1; min-width: 110px; text-align: center; }
+    .chip-label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #6a9050; margin-bottom: 4px; }
+    .chip-value { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: #3a7d20; }
+
+    /* Convert-to-contract button */
+    .convert-btn { padding: 4px 11px; background: #7abb57; color: #fff; border: none; border-radius: 12px; font-size: 11px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .convert-btn:hover { background: #3a7d20; }
+  </style>
+</head>
+<body>
+
+  <div class="top-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 0;">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+      <a href="/dashboard"           class="nav-btn">Dashboard</a>
+      <a href="/manager/clients"     class="nav-btn">Clients</a>
+      <a href="/manager/estimates"   class="nav-btn active">Estimates</a>
+      <a href="/manager/contracts"   class="nav-btn">Contracts</a>
+      <a href="/manager/billing"     class="nav-btn">Billing</a>
+      <a href="/manager/reports"     class="nav-btn">Reports</a>
+      <a href="/manager/employees"   class="nav-btn">Employees</a>
+      <a href="/manager/jobcosting"  class="nav-btn">Job Costing</a>
+      <a href="/manager/home"        class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="page-banner">
+    <div>
+      <h1>Estimates</h1>
+      <p>Create new estimates and view all existing estimate records</p>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ══ SECTION 1: NEW ESTIMATE FORM ══ -->
+    <div class="est-card">
+      <h3>📋 New Estimate Entry</h3>
+      <p class="desc">
+        Fill in all the fields below to create a new estimate. Every field maps directly to the
+        <strong>Estimate</strong> table in the database:
+        <em>Client_ID, Employee_ID, Property_Address, Service_Description,
+        Estimated_Cost, Estimated_Labor_Hours, Estimate_Date.</em>
+        The record is saved to XAMPP on submit.
+      </p>
+
+      <!-- Row 1: Client + Estimator -->
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client ID <span style="color:#c0392b;">*</span></label>
+          <input type="number" id="est-client" placeholder="Enter Client ID (e.g. 1)" min="1" step="1" oninput="lookupClient()"/>
+          <span style="font-size:11px;color:#999;margin-top:3px;display:block;">Enter the numeric Client ID from the database</span>
+          <div id="client-preview" style="display:none;margin-top:8px;background:#f0f9ea;border:1px solid #b8df9f;border-radius:8px;padding:10px 13px;font-size:12px;color:#3a7d20;line-height:1.7;"></div>
+        </div>
+        <div class="form-group">
+          <label>Assigned Estimator (Employee)</label>
+          <select id="est-employee">
+            <option value="">— Select Estimator —</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: Property Address (auto-fills from client, editable) -->
+      <div class="form-row" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>Property Address <span style="color:#c0392b;">*</span></label>
+          <input type="text" id="est-address" placeholder="Address where service will be performed"/>
+        </div>
+      </div>
+
+      <!-- Row 3: Service Description -->
+      <div class="form-row" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>Service Description <span style="color:#c0392b;">*</span></label>
+          <textarea id="est-description" rows="3"
+            placeholder="Describe the scope of work — e.g. Full lawn care and edging, monthly. Include any special notes or conditions."></textarea>
+        </div>
+      </div>
+
+      <!-- Row 4: Cost + Hours + Date -->
+      <div class="form-row" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="form-group">
+          <label>Estimated Cost ($) <span style="color:#c0392b;">*</span></label>
+          <input type="number" id="est-cost" placeholder="0.00" step="0.01" min="0" oninput="updateCostPreview()"/>
+        </div>
+        <div class="form-group">
+          <label>Estimated Labor Hours <span style="color:#c0392b;">*</span></label>
+          <input type="number" id="est-hours" placeholder="0.0" step="0.5" min="0" oninput="updateCostPreview()"/>
+        </div>
+        <div class="form-group">
+          <label>Estimate Date <span style="color:#c0392b;">*</span></label>
+          <input type="date" id="est-date"/>
+        </div>
+      </div>
+
+      <!-- Live cost breakdown preview -->
+      <div class="cost-preview" id="cost-preview" style="display:none;">
+        <div class="cost-item">
+          <div class="cost-label">Estimated Cost</div>
+          <div class="cost-value" id="preview-cost">$0.00</div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-label">Labor Hours</div>
+          <div class="cost-value" id="preview-hours">0.0 hrs</div>
+        </div>
+        <div class="cost-item">
+          <div class="cost-label">Est. Hourly Rate</div>
+          <div class="cost-value" id="preview-rate">—</div>
+        </div>
+      </div>
+
+      <!-- Job Costing: just capture estimated cost for Job_Costing table -->
+      <div style="margin-bottom:16px;padding:14px 16px;background:#f0f9ea;border-radius:8px;border:1px solid #b8df9f;">
+        <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6a9050;margin-bottom:8px;">📊 Job Costing</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Total Estimated Cost ($) <span style="color:#c0392b;">*</span></label>
+            <input type="number" id="jc-est-total" placeholder="0.00" step="0.01" min="0"/>
+            <span style="font-size:11px;color:#999;margin-top:3px;display:block;">This will be saved to the Job_Costing table as the baseline for future actual cost comparisons</span>
+          </div>
+          <div class="form-group">
+            <label>Service ID (to link to Job Costing)</label>
+            <input type="number" id="jc-service-id" placeholder="Enter Service ID if known" min="1" step="1"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" onclick="submitEstimate()">💾 Save Estimate to Database</button>
+        <button class="btn-secondary" onclick="clearForm()">Clear Form</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 2: ALL ESTIMATES TABLE ══ -->
+    <div class="est-card">
+      <h3>📂 All Estimates</h3>
+      <p class="desc">View every estimate in the database. Filter by client or estimator. Use <strong>Convert to Contract</strong> to turn an approved estimate into a contract.</p>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Filter by Client</label>
+          <select id="tbl-client" onchange="renderEstimatesTable()">
+            <option value="">— All Clients —</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Filter by Estimator</label>
+          <select id="tbl-employee" onchange="renderEstimatesTable()">
+            <option value="">— All Estimators —</option>
+          </select>
+        </div>
+        <button class="load-btn" onclick="loadAllEstimates(this)">Load All Estimates</button>
+      </div>
+
+      <div id="estimates-result">
+        <p class="no-results">Click "Load All Estimates" to view records.</p>
+      </div>
+    </div>
+
+  <!-- ══ SECTION 3: SERVICES REPORT ══ -->
+  <div class="est-card">
+    <h3>🛠️ Services Report</h3>
+    <p class="desc">All service records linked to estimates — shows Service ID, Client, Description, Date, and Property Location.</p>
+
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>Filter by Client</label>
+        <select id="svc-client-filter" onchange="renderServicesTable()">
+          <option value="">— All Clients —</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Search Description</label>
+        <input type="text" id="svc-desc-filter" placeholder="e.g. lawn, hauling…" oninput="renderServicesTable()" style="min-width:180px;"/>
+      </div>
+      <div class="filter-group">
+        <label>Date From</label>
+        <input type="date" id="svc-date-from" onchange="renderServicesTable()"/>
+      </div>
+      <div class="filter-group">
+        <label>Date To</label>
+        <input type="date" id="svc-date-to" onchange="renderServicesTable()"/>
+      </div>
+      <button class="load-btn" onclick="loadAllServices(this)">Load Services</button>
+      <button class="load-btn" onclick="clearServiceFilters()" style="background:#888;">Clear</button>
+    </div>
+
+    <div id="services-result">
+      <p class="no-results">Click "Load Services" to view records.</p>
+    </div>
+  </div>
+
+  </div>
+
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+  <div class="toast" id="toast"></div>
+
+<script>
+function fmt(n) { return parseFloat(n||0).toLocaleString('en-US', {minimumFractionDigits:2}); }
+
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast' + (err ? ' error' : '');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display = 'none', 4000);
+}
+
+// Cache for client address lookup
+let clientMap = {};   // Client_ID -> { name, address }
+let allEstimates = [];
+
+// ── Set today as default estimate date ───────────────────────
+document.getElementById('est-date').valueAsDate = new Date();
+
+// ── Load all dropdowns on page load ─────────────────────────
+async function lookupClient() {
+  const cid     = document.getElementById('est-client').value.trim();
+  const preview = document.getElementById('client-preview');
+
+  if (!cid) { preview.style.display = 'none'; return; }
+
+  // Use cached clientMap if available, otherwise fetch
+  if (!Object.keys(clientMap).length) {
+    const clients = await fetch('/api/clients-list').then(r => r.json()).catch(() => []);
+    clients.forEach(c => clientMap[c.Client_ID] = { name: c.Client_Name });
+  }
+
+  const client = clientMap[cid];
+  if (!client) {
+    // Try a direct full lookup
+    const full = await fetch('/api/clients-full').then(r => r.json()).catch(() => []);
+    const found = full.find(c => String(c.Client_ID) === String(cid));
+    if (found) {
+      clientMap[cid] = { name: found.Client_Name, phone: found.Client_Phone, email: found.Client_Email, address: found.Property_Address };
+    } else {
+      preview.style.display = 'block';
+      preview.innerHTML = '<span style="color:#c0392b;">⚠️ Client ID not found. Check the ID and try again.</span>';
+      return;
+    }
+  }
+
+  const c = clientMap[cid];
+  preview.style.display = 'block';
+  preview.innerHTML = `
+    <strong>Client ID ${cid} Found ✓</strong><br>
+    <span style="color:#555;">
+      <strong>Name:</strong> ${c.name}
+      ${c.phone  ? `&nbsp;|&nbsp; <strong>Phone:</strong> ${c.phone}` : ''}
+      ${c.email  ? `<br><strong>Email:</strong> ${c.email}` : ''}
+      ${c.address ? `<br><strong>Address:</strong> ${c.address}` : ''}
+    </span>`;
+
+  // Auto-fill address if empty
+  if (c.address && !document.getElementById('est-address').value) {
+    document.getElementById('est-address').value = c.address;
+  }
+}
+
+async function loadDropdowns() {
+  // Clients
+  const clients = await fetch('/api/clients-list').then(r => r.json()).catch(() => []);
+  const tblClient = document.getElementById('tbl-client');
+  clients.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.Client_ID; o.textContent = c.Client_Name;
+    tblClient.appendChild(o);
+    clientMap[c.Client_ID] = { name: c.Client_Name };
+  });
+
+  // Employees / estimators
+  const emps = await fetch('/api/employees-list').then(r => r.json()).catch(() => []);
+  ['est-employee', 'tbl-employee'].forEach(id => {
+    const sel = document.getElementById(id);
+    emps.forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.Employee_ID;
+      o.textContent = id === 'tbl-employee'
+        ? `${e.Employee_Name} (${e.Employee_Role})`
+        : `${e.Employee_Name} — ${e.Employee_Role}`;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// Client address auto-fill removed — user enters Client ID manually
+
+// ── Live cost breakdown preview ──────────────────────────────
+function updateCostPreview() {
+  const cost  = parseFloat(document.getElementById('est-cost').value)  || 0;
+  const hours = parseFloat(document.getElementById('est-hours').value) || 0;
+  const prev  = document.getElementById('cost-preview');
+
+  if (cost <= 0 && hours <= 0) { prev.style.display = 'none'; return; }
+
+  prev.style.display = 'flex';
+  document.getElementById('preview-cost').textContent  = '$' + fmt(cost);
+  document.getElementById('preview-hours').textContent = hours.toFixed(1) + ' hrs';
+
+  if (cost > 0 && hours > 0) {
+    const rate = cost / hours;
+    document.getElementById('preview-rate').textContent = '$' + fmt(rate) + '/hr';
+  } else {
+    document.getElementById('preview-rate').textContent = '—';
+  }
+}
+
+// ══ SUBMIT NEW ESTIMATE ══════════════════════════════════════
+async function submitEstimate() {
+  const clientId  = document.getElementById('est-client').value.trim();
+  const empId     = document.getElementById('est-employee').value;
+  const address   = document.getElementById('est-address').value.trim();
+  const desc      = document.getElementById('est-description').value.trim();
+  const cost      = parseFloat(document.getElementById('est-cost').value);
+  const hours     = parseFloat(document.getElementById('est-hours').value);
+  const date      = document.getElementById('est-date').value;
+  // Job costing
+
+
+  // Validation
+  if (!clientId || isNaN(parseInt(clientId))) { showToast('Please enter a valid numeric Client ID.', true); return; }
+  if (!address)  { showToast('Please enter a property address.', true); return; }
+  if (!desc)     { showToast('Please enter a service description.', true); return; }
+  if (!cost || cost <= 0) { showToast('Please enter a valid estimated cost.', true); return; }
+  if (!hours || hours <= 0) { showToast('Please enter estimated labor hours.', true); return; }
+  if (!date)     { showToast('Please select an estimate date.', true); return; }
+
+  const body = {
+    client_id:              parseInt(clientId),
+    employee_id:            empId || null,
+    property_address:       address,
+    service_description:    desc,
+    estimated_cost:         cost,
+    estimated_labor_hours:  hours,
+    estimate_date:          date,
+    total_estimated_cost:   parseFloat(document.getElementById('jc-est-total').value) || cost,
+    service_id:             document.getElementById('jc-service-id').value.trim() ? parseInt(document.getElementById('jc-service-id').value.trim()) : null
+  };
+
+  const res = await fetch('/submit/estimate', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(body)
+  }).then(r => r.json()).catch(() => ({ success: false, message: 'Network error' }));
+
+  if (res.success) {
+    showToast('✅ Estimate saved to database!');
+    clearForm();
+    // If the table is loaded, refresh it
+    if (allEstimates.length) loadAllEstimates({ disabled: false, textContent: '' });
+  } else {
+    showToast('❌ ' + res.message, true);
+  }
+}
+
+function clearForm() {
+  document.getElementById('est-client').value      = '';
+  document.getElementById('client-preview').style.display = 'none';
+  ['jc-est-total','jc-service-id'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('est-employee').value    = '';
+  document.getElementById('est-address').value     = '';
+  document.getElementById('est-description').value = '';
+  document.getElementById('est-cost').value        = '';
+  document.getElementById('est-hours').value       = '';
+  document.getElementById('est-date').valueAsDate  = new Date();
+  document.getElementById('cost-preview').style.display = 'none';
+}
+
+// ══ LOAD ALL ESTIMATES TABLE ═════════════════════════════════
+async function loadAllEstimates(btn) {
+  btn.disabled = true; btn.textContent = '⏳ Loading...';
+  document.getElementById('estimates-result').innerHTML = '<p class="loading">⏳ Loading estimates...</p>';
+
+  allEstimates = await fetch('/api/all-estimates').then(r => r.json()).catch(() => []);
+  btn.disabled = false; btn.textContent = 'Refresh';
+  renderEstimatesTable();
+}
+
+function renderEstimatesTable() {
+  const clientFilter = document.getElementById('tbl-client').value;
+  const empFilter    = document.getElementById('tbl-employee').value;
+  const el           = document.getElementById('estimates-result');
+
+  if (!allEstimates.length) {
+    el.innerHTML = '<p class="no-results">Click "Load All Estimates" to view records.</p>';
+    return;
+  }
+
+  let rows = allEstimates;
+  if (clientFilter) rows = rows.filter(r => String(r.Client_ID) === String(clientFilter));
+  if (empFilter)    rows = rows.filter(r => String(r.Employee_ID || '') === String(empFilter));
+
+  if (!rows.length) {
+    el.innerHTML = '<p class="no-results">No estimates match those filters.</p>';
+    return;
+  }
+
+  // Summary totals
+  const totalCost  = rows.reduce((s, r) => s + parseFloat(r.Estimated_Cost   || 0), 0);
+  const totalHours = rows.reduce((s, r) => s + parseFloat(r.Estimated_Labor_Hours || 0), 0);
+
+  let html = `<div class="chip-row">
+    <div class="chip">
+      <div class="chip-label">Total Estimates</div>
+      <div class="chip-value">${rows.length}</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Total Est. Cost</div>
+      <div class="chip-value">$${fmt(totalCost)}</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Total Est. Hours</div>
+      <div class="chip-value">${totalHours.toFixed(1)} hrs</div>
+    </div>
+    <div class="chip">
+      <div class="chip-label">Avg Cost / Estimate</div>
+      <div class="chip-value">$${fmt(rows.length ? totalCost / rows.length : 0)}</div>
+    </div>
+  </div>
+
+  <div class="results-wrap">
+    <table class="results-table">
+      <thead><tr>
+        <th>Est. ID</th>
+        <th>Client</th>
+        <th>Property Address</th>
+        <th>Service Description</th>
+        <th>Est. Cost</th>
+        <th>Labor Hours</th>
+        <th>Hourly Rate</th>
+        <th>Date</th>
+        <th>Estimator</th>
+        <th>Action</th>
+      </tr></thead>
+      <tbody>`;
+
+  rows.forEach(r => {
+    const cost  = parseFloat(r.Estimated_Cost          || 0);
+    const hours = parseFloat(r.Estimated_Labor_Hours   || 0);
+    const rate  = (cost > 0 && hours > 0) ? (cost / hours) : 0;
+
+    // Truncate long descriptions
+    const descShort = r.Service_Description && r.Service_Description.length > 55
+      ? r.Service_Description.substring(0, 55) + '…'
+      : (r.Service_Description || '—');
+
+    html += `<tr>
+      <td><strong>EST-${r.Estimate_ID}</strong></td>
+      <td>${r.Client_Name}</td>
+      <td style="font-size:12px;color:#666;">${r.Property_Address || '—'}</td>
+      <td title="${r.Service_Description || ''}" style="font-size:12px;">${descShort}</td>
+      <td class="money">$${fmt(cost)}</td>
+      <td>${hours.toFixed(1)} hrs</td>
+      <td class="money">${rate > 0 ? '$' + fmt(rate) + '/hr' : '—'}</td>
+      <td>${r.Estimate_Date || '—'}</td>
+      <td>${r.Employee_Name || '<span style="color:#bbb;">Unassigned</span>'}</td>
+      <td>
+        <button class="convert-btn"
+          onclick="convertToContract(${r.Estimate_ID}, ${r.Client_ID}, '${(r.Client_Name||'').replace(/'/g,"\\'")}', ${cost})">
+          → Contract
+        </button>
+      </td>
+    </tr>`;
+  });
+
+  // Totals row
+  html += `<tr class="totals-row">
+    <td colspan="4"><strong>TOTAL (${rows.length} estimates)</strong></td>
+    <td class="money">$${fmt(totalCost)}</td>
+    <td>${totalHours.toFixed(1)} hrs</td>
+    <td colspan="4">—</td>
+  </tr>`;
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+// ── Convert estimate → contract (goes to contracts page with pre-fill) ──
+function convertToContract(estimateId, clientId, clientName, cost) {
+  // Store info in sessionStorage then redirect to contracts page
+  sessionStorage.setItem('prefill_contract', JSON.stringify({
+    estimate_id: estimateId,
+    client_id:   clientId,
+    client_name: clientName,
+    pricing:     cost
+  }));
+  window.location.href = '/manager/contracts';
+}
+
+// ══ SERVICES REPORT ═════════════════════════════════════════
+let allServices = [];
+
+async function loadAllServices(btn) {
+  btn.disabled = true; btn.textContent = '⏳ Loading...';
+  document.getElementById('services-result').innerHTML = '<p class="loading">⏳ Loading services...</p>';
+
+  allServices = await fetch('/api/all-services').then(r => r.json()).catch(() => []);
+
+  // Populate client dropdown
+  const sel = document.getElementById('svc-client-filter');
+  sel.innerHTML = '<option value="">— All Clients —</option>';
+  const seen = new Set();
+  allServices.forEach(s => {
+    if (!seen.has(s.Client_ID)) {
+      seen.add(s.Client_ID);
+      const o = document.createElement('option');
+      o.value = s.Client_ID; o.textContent = s.Client_Name;
+      sel.appendChild(o);
+    }
+  });
+
+  btn.disabled = false; btn.textContent = 'Refresh';
+  renderServicesTable();
+}
+
+function clearServiceFilters() {
+  document.getElementById('svc-client-filter').value = '';
+  document.getElementById('svc-desc-filter').value   = '';
+  document.getElementById('svc-date-from').value     = '';
+  document.getElementById('svc-date-to').value       = '';
+  renderServicesTable();
+}
+
+function renderServicesTable() {
+  const clientFilter = document.getElementById('svc-client-filter').value;
+  const descFilter   = document.getElementById('svc-desc-filter').value.toLowerCase().trim();
+  const dateFrom     = document.getElementById('svc-date-from').value;
+  const dateTo       = document.getElementById('svc-date-to').value;
+  const el           = document.getElementById('services-result');
+
+  if (!allServices.length) {
+    el.innerHTML = '<p class="no-results">Click "Load Services" to view records.</p>';
+    return;
+  }
+
+  let rows = allServices;
+  if (clientFilter) rows = rows.filter(r => String(r.Client_ID) === String(clientFilter));
+  if (descFilter)   rows = rows.filter(r => (r.Service_Description || '').toLowerCase().includes(descFilter));
+  if (dateFrom)     rows = rows.filter(r => r.Service_Date && r.Service_Date >= dateFrom);
+  if (dateTo)       rows = rows.filter(r => r.Service_Date && r.Service_Date <= dateTo);
+
+  if (!rows.length) {
+    el.innerHTML = '<p class="no-results">No services match those filters.</p>';
+    return;
+  }
+
+  let html = `
+  <div class="chip-row">
+    <div class="chip"><div class="chip-label">Total Services</div><div class="chip-value">${rows.length}</div></div>
+    <div class="chip"><div class="chip-label">With Description</div><div class="chip-value">${rows.filter(r => r.Service_Description).length}</div></div>
+    <div class="chip"><div class="chip-label">Unique Clients</div><div class="chip-value">${new Set(rows.map(r => r.Client_ID)).size}</div></div>
+  </div>
+  <div class="results-wrap">
+    <table class="results-table">
+      <thead><tr>
+        <th>Service ID</th>
+        <th>Client ID</th>
+        <th>Client Name</th>
+        <th>Service Description</th>
+        <th>Service Date</th>
+        <th>Property Location</th>
+      </tr></thead>
+      <tbody>`;
+
+  rows.forEach(r => {
+    const desc = r.Service_Description || '';
+    const descDisplay = desc.length > 65
+      ? `<span title="${desc.replace(/"/g,'&quot;')}">${desc.substring(0,65)}…</span>`
+      : (desc || '<span style="color:#bbb;">—</span>');
+
+    html += `<tr>
+      <td><strong>SVC-${r.Service_ID}</strong></td>
+      <td>${r.Client_ID}</td>
+      <td>${r.Client_Name}</td>
+      <td style="font-size:12px;">${descDisplay}</td>
+      <td>${r.Service_Date || '<span style="color:#bbb;">—</span>'}</td>
+      <td style="font-size:12px;color:#555;">${r.Property_Location || '<span style="color:#bbb;">—</span>'}</td>
+    </tr>`;
+  });
+
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+// Init
+loadDropdowns();
+</script>
+</body>
+</html>

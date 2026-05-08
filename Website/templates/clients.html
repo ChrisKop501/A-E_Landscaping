@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Clients</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/pages.css"/>
+  <style>
+    .section-card { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .section-card h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; }
+    .section-card .desc { font-size:13px; color:#888; margin-bottom:18px; }
+    .filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:18px; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; }
+    .filter-group label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#6a9050; }
+    .filter-group select, .filter-group input {
+      padding:9px 12px; border-radius:8px; border:1.5px solid #ccc;
+      font-size:14px; font-family:inherit; outline:none; min-width:180px;
+    }
+    .filter-group select:focus, .filter-group input:focus { border-color:#7abb57; }
+    .run-btn { padding:10px 22px; background:#3a7d20; color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; align-self:flex-end; }
+    .run-btn:hover { background:#2e6318; }
+    .results-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .results-table th { background:#b8df9f; color:#3a7d20; padding:10px 12px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .results-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; color:#333; }
+    .results-table tr:hover td { background:#f7fdf4; }
+    .results-wrap { border-radius:10px; overflow:hidden; border:1px solid #ddd; }
+    .no-results { color:#999; font-size:13px; padding:16px 0; text-align:center; }
+    .loading { color:#6a9050; font-size:13px; padding:12px 0; }
+    .stars { color:#f0a500; font-size:15px; }
+    .toast { position:fixed; bottom:24px; right:24px; background:#3a7d20; color:#fff; padding:14px 22px; border-radius:10px; font-size:14px; font-weight:700; box-shadow:0 4px 18px rgba(0,0,0,0.18); z-index:999; display:none; }
+    .toast.error { background:#c0392b; }
+    .badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .badge-paid    { background:#d4f0bb; color:#2e6318; }
+    .badge-unpaid  { background:#fde8e8; color:#c0392b; }
+    .badge-partial { background:#fff3cd; color:#856404; }
+    .money { font-weight:700; color:#3a7d20; }
+    .badge-pending   { background:#fff3cd; color:#856404; display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .badge-contacted { background:#dce8ff; color:#1a3e8a; display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .badge-verified  { background:#d4f0bb; color:#2e6318; display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .client-chip { display:inline-flex; align-items:center; gap:5px; background:#f0f9ea; color:#3a7d20; border:1px solid #b8df9f; border-radius:10px; padding:2px 9px; font-size:11px; font-weight:700; }
+    .sortable { cursor:pointer; user-select:none; }
+    .sortable:hover { background:#a8d48a; }
+    .sort-arrow { margin-left:4px; opacity:.6; }
+    /* Centre the referrals panel content */
+    .referrals-panel { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .referrals-panel h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; text-align:center; }
+    .referrals-panel .desc { font-size:13px; color:#888; margin-bottom:18px; text-align:center; }
+    .ref-filter-center { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; justify-content:center; margin-bottom:18px; }
+  </style>
+</head>
+<body>
+  <div class="top-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 0;">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+            <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <a href="/manager/clients"class="nav-btn active">Clients</a>
+      <a href="/manager/estimates" class="nav-btn">Estimates</a>
+      <a href="/manager/contracts" class="nav-btn">Contracts</a>
+      <a href="/manager/billing" class="nav-btn">Billing</a>
+      <a href="/manager/reports" class="nav-btn">Reports</a>
+      <a href="/manager/employees" class="nav-btn">Employees</a>
+      <a href="/manager/jobcosting" class="nav-btn">Job Costing</a>
+      <a href="/manager/home" class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="page-banner">
+    <div><h1>Clients</h1><p>Add new clients, look up feedback, and review full service history</p></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ── FORM 3: New Client (top of page) ── -->
+    <div class="section-card">
+      <h3>👤 Add New Client</h3>
+      <p class="desc">Fill in the form below to add a new client to the database. This will be saved directly to XAMPP.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client Name</label>
+          <input type="text" id="c-name" placeholder="Full name or company name"/>
+        </div>
+        <div class="form-group">
+          <label>Phone</label>
+          <input type="tel" id="c-phone" placeholder="(808) 000-0000"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="c-email" placeholder="client@email.com"/>
+        </div>
+        <div class="form-group">
+          <label>Property Address</label>
+          <input type="text" id="c-addr" placeholder="Full street address"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="submitClient()">Save Client to Database</button>
+        <button class="btn-secondary" onclick="clearClient()">Clear</button>
+      </div>
+    </div>
+
+    <!-- ── ROUTINE QUERY 1: Client Feedback ── -->
+    <div class="section-card">
+      <h3>⭐ Client Feedback Lookup</h3>
+      <p class="desc">Look up feedback by client or filter by star rating (1–5). Leave both blank to see all feedback.</p>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Client</label>
+          <select id="fb-client">
+            <option value="">— All Clients —</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Rating</label>
+          <select id="fb-rating">
+            <option value="">— Any Rating —</option>
+            <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+            <option value="4">⭐⭐⭐⭐ (4)</option>
+            <option value="3">⭐⭐⭐ (3)</option>
+            <option value="2">⭐⭐ (2)</option>
+            <option value="1">⭐ (1)</option>
+          </select>
+        </div>
+        <button class="run-btn" onclick="loadFeedback()">Search Feedback</button>
+      </div>
+      <div id="feedback-results"><p class="no-results">Select filters and click Search Feedback.</p></div>
+    </div>
+
+    <!-- ── REPORT 3: Client Service History ── -->
+    <div class="section-card">
+      <h3>📁 Client Service History</h3>
+      <p class="desc">Full history of services, contracts, invoices, and payments per client or property location.</p>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Client</label>
+          <select id="hist-client">
+            <option value="">— All Clients —</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Property Location (keyword)</label>
+          <input type="text" id="hist-loc" placeholder="e.g. Honolulu" style="min-width:180px;"/>
+        </div>
+        <button class="run-btn" onclick="loadHistory()">Load History</button>
+      </div>
+      <div id="history-results"><p class="no-results">Select a client or enter a location and click Load History.</p></div>
+    </div>
+
+  </div>
+
+    <!-- ── REFERRALS TABLE ── -->
+    <div class="referrals-panel">
+      <h3>🤝 Referrals</h3>
+      <p class="desc">All referrals submitted through the client website. Filter by Referrer Client ID or search by referred name. Click any column header to sort.</p>
+      <div class="ref-filter-center">
+        <div class="filter-group">
+          <label>Filter by Referrer Client ID</label>
+          <input type="number" id="ref-filter-id" placeholder="e.g. 1" min="1" step="1"/>
+        </div>
+        <div class="filter-group">
+          <label>Search by Referee Name</label>
+          <input type="text" id="ref-filter-name" placeholder="Search referred name..."/>
+        </div>
+        <button class="run-btn" onclick="loadReferrals()">Load Referrals</button>
+        <button class="run-btn" style="background:#888;" onclick="clearRefFilters()">Show All</button>
+      </div>
+      <div id="referrals-result" style="text-align:center;">
+        <p class="no-results">Click "Load Referrals" to view the referral list.</p>
+      </div>
+    </div>
+
+  </div>
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+  <div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (err?' error':'');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display='none', 3500);
+}
+function fmt(n) { return parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2}); }
+function stars(n) { return '⭐'.repeat(parseInt(n||0)); }
+
+async function loadDropdowns() {
+  const clients = await fetch('/api/clients-list').then(r=>r.json()).catch(()=>[]);
+  ['fb-client','hist-client'].forEach(id => {
+    const sel = document.getElementById(id);
+    clients.forEach(c => { const o=document.createElement('option'); o.value=c.Client_ID; o.textContent=`${c.Client_Name} (ID: ${c.Client_ID})`; sel.appendChild(o); });
+  });
+}
+
+// ── Submit new client ───────────────────────────────────────
+async function submitClient() {
+  const body = {
+    client_name:      document.getElementById('c-name').value.trim(),
+    client_phone:     document.getElementById('c-phone').value.trim(),
+    client_email:     document.getElementById('c-email').value.trim(),
+    property_address: document.getElementById('c-addr').value.trim(),
+  };
+  if (!body.client_name) { showToast('Client name is required.', true); return; }
+  const res = await fetch('/submit/client', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+  showToast(res.success ? '✅ Client saved to database!' : '❌ ' + res.message, !res.success);
+  if (res.success) clearClient();
+}
+function clearClient() {
+  ['c-name','c-phone','c-email','c-addr'].forEach(id => document.getElementById(id).value='');
+}
+
+// ── Load feedback ───────────────────────────────────────────
+async function loadFeedback() {
+  const cid    = document.getElementById('fb-client').value;
+  const rating = document.getElementById('fb-rating').value;
+  const el     = document.getElementById('feedback-results');
+  el.innerHTML = '<p class="loading">⏳ Loading...</p>';
+  let url = '/api/client-feedback?';
+  if (cid)    url += `client_id=${cid}&`;
+  if (rating) url += `rating=${rating}`;
+  const data = await fetch(url).then(r=>r.json()).catch(()=>[]);
+  if (!data.length) { el.innerHTML='<p class="no-results">No feedback found for those filters.</p>'; return; }
+
+  let html = `<div class="results-wrap"><table class="results-table"><thead><tr>
+    <th>ID</th><th>Client</th><th>Service</th><th>Date</th><th>Rating</th><th>Comments</th><th>Suggestions</th>
+  </tr></thead><tbody>`;
+  data.forEach(r => {
+    html += `<tr>
+      <td>${r.Feedback_ID}</td><td><strong>${r.Client_Name}</strong></td>
+      <td>${r.Service_Type}</td><td>${r.Feedback_Date}</td>
+      <td class="stars">${stars(r.Rating)} (${r.Rating})</td>
+      <td>${r.Comments||'—'}</td><td>${r.Suggestions||'—'}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+// ── Load service history ────────────────────────────────────
+async function loadHistory() {
+  const cid = document.getElementById('hist-client').value;
+  const loc = document.getElementById('hist-loc').value.trim();
+  const el  = document.getElementById('history-results');
+  el.innerHTML = '<p class="loading">⏳ Loading...</p>';
+  let url = '/api/client-service-history?';
+  if (cid) url += `client_id=${cid}&`;
+  if (loc) url += `location=${encodeURIComponent(loc)}`;
+  const data = await fetch(url).then(r=>r.json()).catch(()=>[]);
+  if (!data.length) { el.innerHTML='<p class="no-results">No history found.</p>'; return; }
+
+  let html = `<div class="results-wrap"><table class="results-table"><thead><tr>
+    <th>Client</th><th>Service Date</th><th>Service Type</th><th>Location</th>
+    <th>Contract ID</th><th>Invoice</th><th>Invoice Status</th><th>Billed</th><th>Paid</th>
+  </tr></thead><tbody>`;
+  data.forEach(r => {
+    const sc = r.Invoice_Status==='Paid'?'badge-paid':r.Invoice_Status==='Unpaid'?'badge-unpaid':'badge-partial';
+    html += `<tr>
+      <td><strong>${r.Client_Name}</strong></td><td>${r.Service_Date}</td>
+      <td>${r.Service_Type}</td><td>${r.Property_Location}</td>
+      <td>${r.Contract_ID}</td><td>${r.Invoice_ID}</td>
+      <td><span class="badge ${sc}">${r.Invoice_Status}</span></td>
+      <td class="money">$${fmt(r.Total_Amount)}</td>
+      <td class="money">$${fmt(r.Amount_Paid)}</td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  el.innerHTML = html;
+}
+
+loadDropdowns();
+
+// ── REFERRALS ───────────────────────────────────────────────
+let allReferrals = [];
+let sortCol = 'Referral_ID', sortDir = 'desc';
+
+function clearRefFilters() {
+  document.getElementById('ref-filter-id').value   = '';
+  document.getElementById('ref-filter-name').value = '';
+  loadReferrals();
+}
+
+async function loadReferrals() {
+  const refId  = document.getElementById('ref-filter-id').value.trim();
+  const nameQ  = document.getElementById('ref-filter-name').value.trim().toLowerCase();
+  const el     = document.getElementById('referrals-result');
+  el.innerHTML = '<p class="loading">⏳ Loading referrals...</p>';
+
+  const url    = '/api/referrals' + (refId ? `?referrer_id=${refId}` : '');
+  allReferrals = await fetch(url).then(r=>r.json()).catch(()=>[]);
+
+  let rows = allReferrals;
+  if (nameQ) rows = rows.filter(r => (r.Referee_Name||'').toLowerCase().includes(nameQ));
+  renderReferralTable(rows);
+}
+
+function renderReferralTable(rows) {
+  const el = document.getElementById('referrals-result');
+  if (!rows.length) { el.innerHTML='<p class="no-results">No referrals found.</p>'; return; }
+
+  // Sort
+  rows = [...rows].sort((a,b) => {
+    let av = a[sortCol] ?? '', bv = b[sortCol] ?? '';
+    if (!isNaN(av) && !isNaN(bv)) { av=parseFloat(av)||0; bv=parseFloat(bv)||0; }
+    else { av=String(av).toLowerCase(); bv=String(bv).toLowerCase(); }
+    if (av < bv) return sortDir==='asc'?-1:1;
+    if (av > bv) return sortDir==='asc'?1:-1;
+    return 0;
+  });
+
+  function arrow(col) {
+    if (sortCol!==col) return '<span class="sort-arrow">⇅</span>';
+    return sortDir==='asc'?'<span class="sort-arrow">↑</span>':'<span class="sort-arrow">↓</span>';
+  }
+  function th(col, label) {
+    return `<th class="sortable" onclick="sortReferrals('${col}')" style="text-align:center;">${label} ${arrow(col)}</th>`;
+  }
+  function statusBadge(s) {
+    const map = {Pending:'badge-pending',Contacted:'badge-contacted',Verified:'badge-verified'};
+    return `<span class="${map[s]||'badge-pending'}">${s||'Pending'}</span>`;
+  }
+
+  let html = `<div class="results-wrap">
+    <table class="results-table" style="text-align:center;">
+      <thead><tr>
+        ${th('Referral_ID','Referral ID')}
+        ${th('Referee_Name','Referee Name')}
+        ${th('Referrer_ID','Referrer ID')}
+        ${th('Referrer_Name','Referrer Name')}
+        ${th('Referral_Date','Date')}
+        ${th('Status','Status')}
+      </tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    const referrerId   = r.Referrer_ID || '—';
+    const referrerName = r.Referrer_Name
+      ? `<span class="client-chip">👤 ${r.Referrer_Name}</span>`
+      : '<span style="color:#bbb;font-size:12px;">No account</span>';
+    const refereeName  = r.Referee_Client_Name
+      ? `<strong>${r.Referee_Name}</strong> <span class="client-chip" style="margin-left:4px;">✓ ${r.Referee_Client_Name}</span>`
+      : `<strong>${r.Referee_Name}</strong>`;
+
+    html += `<tr>
+      <td>${r.Referral_ID}</td>
+      <td style="text-align:left;">${refereeName}</td>
+      <td>${referrerId!=='—'?`<strong>${referrerId}</strong>`:'—'}</td>
+      <td>${referrerName}</td>
+      <td>${r.Referral_Date||'—'}</td>
+      <td>${statusBadge(r.Status)}</td>
+    </tr>`;
+  });
+
+  html += `<tr class="totals-row">
+    <td colspan="6" style="text-align:center;"><strong>${rows.length} referral${rows.length!==1?'s':''} shown</strong></td>
+  </tr></tbody></table></div>`;
+
+  el.innerHTML = html;
+}
+
+function sortReferrals(col) {
+  if (sortCol===col) sortDir = sortDir==='asc'?'desc':'asc';
+  else { sortCol=col; sortDir='asc'; }
+  const nameQ = document.getElementById('ref-filter-name').value.trim().toLowerCase();
+  let rows = allReferrals;
+  if (nameQ) rows = rows.filter(r=>(r.Referee_Name||'').toLowerCase().includes(nameQ));
+  renderReferralTable(rows);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Contracts</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/pages.css"/>
+  <style>
+    .toast { position:fixed; bottom:24px; right:24px; background:#3a7d20; color:#fff; padding:14px 22px; border-radius:10px; font-size:14px; font-weight:700; box-shadow:0 4px 18px rgba(0,0,0,0.18); z-index:999; display:none; }
+    .toast.error { background:#c0392b; }
+    .section-card { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .section-card h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; }
+    .section-card .desc { font-size:13px; color:#888; margin-bottom:18px; }
+  </style>
+</head>
+<body>
+  <div class="top-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 0;">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+            <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <a href="/manager/clients" class="nav-btn">Clients</a>
+      <a href="/manager/estimates" class="nav-btn">Estimates</a>
+      <a href="/manager/contracts"class="nav-btn active">Contracts</a>
+      <a href="/manager/billing" class="nav-btn">Billing</a>
+      <a href="/manager/reports" class="nav-btn">Reports</a>
+      <a href="/manager/employees" class="nav-btn">Employees</a>
+      <a href="/manager/jobcosting" class="nav-btn">Job Costing</a>
+      <a href="/manager/home" class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="page-banner">
+    <div><h1>Contracts</h1><p>Create new contracts linked to clients and estimates — saved directly to the database</p></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ── FORM 4: Contract Entry ── -->
+    <div class="section-card">
+      <h3>📄 New Contract Entry</h3>
+      <p class="desc">Fill out the form to create a new service contract. Select the client and optionally link it to an existing estimate.</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client</label>
+          <select id="con-client">
+            <option value="">— Select Client —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Related Estimate ID (optional)</label>
+          <input type="number" id="con-estimate" placeholder="Enter Estimate ID (e.g. 3)" min="1" step="1" oninput="lookupEstimate()"/>
+          <span style="font-size:11px;color:#999;margin-top:3px;display:block;">Enter the numeric Estimate ID from the database</span>
+          <div id="est-preview" style="display:none;margin-top:8px;background:#f0f9ea;border:1px solid #b8df9f;border-radius:8px;padding:10px 13px;font-size:12px;color:#3a7d20;line-height:1.7;"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Start Date</label>
+          <input type="date" id="con-start"/>
+        </div>
+        <div class="form-group">
+          <label>End Date</label>
+          <input type="date" id="con-end"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pricing ($)</label>
+          <input type="number" id="con-price" placeholder="0.00" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label>Duration</label>
+          <select id="con-duration">
+            <option>1 month</option><option>2 months</option>
+            <option>3 months</option><option>6 months</option>
+            <option>12 months</option><option>Ongoing</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label>Service Scope</label>
+          <textarea id="con-scope" rows="3" placeholder="Describe what's included in this contract..."></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="submitContract()">Save Contract to Database</button>
+        <button class="btn-secondary" onclick="clearContract()">Clear</button>
+      </div>
+    </div>
+
+  </div>
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+  <div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent=msg; t.className='toast'+(err?' error':'');
+  t.style.display='block'; setTimeout(()=>t.style.display='none',3500);
+}
+
+let estCache = {};
+
+async function lookupEstimate() {
+  const estId   = document.getElementById('con-estimate').value.trim();
+  const preview = document.getElementById('est-preview');
+
+  if (!estId) { preview.style.display = 'none'; return; }
+
+  // Load cache if empty
+  if (!Object.keys(estCache).length) {
+    const all = await fetch('/api/all-estimates').then(r => r.json()).catch(() => []);
+    all.forEach(e => estCache[e.Estimate_ID] = e);
+  }
+
+  const est = estCache[estId];
+  if (!est) {
+    preview.style.display = 'block';
+    preview.innerHTML = '<span style="color:#c0392b;">⚠️ Estimate ID not found. Check the ID and try again.</span>';
+    return;
+  }
+
+  const cost = parseFloat(est.Estimated_Cost || 0).toLocaleString('en-US', {minimumFractionDigits:2});
+  preview.style.display = 'block';
+  preview.innerHTML = `
+    <strong>EST-${est.Estimate_ID} Found ✓</strong><br>
+    <span style="color:#555;">
+      <strong>Client:</strong> ${est.Client_Name}<br>
+      <strong>Service:</strong> ${est.Service_Description || '—'}<br>
+      <strong>Est. Cost:</strong> $${cost} &nbsp;|&nbsp;
+      <strong>Hours:</strong> ${est.Estimated_Labor_Hours || 0} hrs &nbsp;|&nbsp;
+      <strong>Date:</strong> ${est.Estimate_Date || '—'}
+    </span>`;
+
+  // Auto-fill pricing if empty
+  if (!document.getElementById('con-price').value) {
+    document.getElementById('con-price').value = parseFloat(est.Estimated_Cost || 0).toFixed(2);
+  }
+  // Auto-fill scope if empty
+  if (!document.getElementById('con-scope').value && est.Service_Description) {
+    document.getElementById('con-scope').value = est.Service_Description;
+  }
+}
+
+async function loadDropdowns() {
+  const clients = await fetch('/api/clients-list').then(r=>r.json()).catch(()=>[]);
+  const csel = document.getElementById('con-client');
+  clients.forEach(c => { const o=document.createElement('option'); o.value=c.Client_ID; o.textContent=`${c.Client_Name} (ID: ${c.Client_ID})`; csel.appendChild(o); });
+
+  // Estimate ID entered manually by user — no dropdown needed
+}
+
+async function submitContract() {
+  const body = {
+    client_id:     document.getElementById('con-client').value,
+    estimate_id:   document.getElementById('con-estimate').value || null,
+    start_date:    document.getElementById('con-start').value,
+    end_date:      document.getElementById('con-end').value,
+    pricing:       document.getElementById('con-price').value,
+    duration:      document.getElementById('con-duration').value,
+    service_scope: document.getElementById('con-scope').value.trim(),
+  };
+  if (!body.client_id) { showToast('Please select a client.', true); return; }
+  if (!body.start_date || !body.end_date) { showToast('Please enter start and end dates.', true); return; }
+  if (!body.pricing || parseFloat(body.pricing) <= 0) { showToast('Please enter a valid price.', true); return; }
+
+  const res = await fetch('/submit/contract', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+  showToast(res.success ? '✅ Contract saved to database!' : '❌ ' + res.message, !res.success);
+  if (res.success) clearContract();
+}
+
+function clearContract() {
+  ['con-client','con-estimate','con-start','con-end','con-price','con-scope'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el.tagName==='SELECT') el.value=''; else el.value='';
+  });
+  document.getElementById('est-preview').style.display = 'none';
+}
+
+loadDropdowns();
+</script>
+</body>
+</html>

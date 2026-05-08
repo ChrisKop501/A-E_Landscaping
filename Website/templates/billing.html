@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Billing</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/pages.css"/>
+  <style>
+    .billing-card { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .billing-card h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; }
+    .billing-card .desc { font-size:13px; color:#888; margin-bottom:18px; }
+    .toast { position:fixed; bottom:24px; right:24px; background:#3a7d20; color:#fff; padding:14px 22px; border-radius:10px; font-size:14px; font-weight:700; box-shadow:0 4px 18px rgba(0,0,0,0.18); z-index:999; display:none; max-width:340px; }
+    .toast.error { background:#c0392b; }
+    .badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .badge-paid    { background:#d4f0bb; color:#2e6318; }
+    .badge-unpaid  { background:#fde8e8; color:#c0392b; }
+    .badge-partial { background:#fff3cd; color:#856404; }
+    .invoice-preview { background:#f0f9ea; border:1.5px solid #b8df9f; border-radius:10px; padding:14px 18px; margin:14px 0; display:none; }
+    .invoice-preview h4 { color:#3a7d20; font-size:14px; margin-bottom:10px; font-weight:700; }
+    .inv-detail { display:flex; gap:20px; flex-wrap:wrap; }
+    .inv-detail span { font-size:13px; color:#555; }
+    .inv-detail strong { color:#1a2e10; }
+    .status-indicator { display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px; font-size:13px; font-weight:700; background:#f0f9ea; border:1.5px solid #b8df9f; margin-top:6px; transition:all .2s; }
+    .results-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .results-table th { background:#b8df9f; color:#3a7d20; padding:10px 12px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .results-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; color:#333; }
+    .results-table tr:hover td { background:#f7fdf4; }
+    .results-wrap { border-radius:10px; overflow:hidden; border:1px solid #ddd; }
+    .money { font-weight:700; color:#3a7d20; }
+    .money-red { font-weight:700; color:#c0392b; }
+    .totals-row td { background:#f0f9ea; font-weight:700; }
+    .load-btn { padding:10px 22px; background:#3a7d20; color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; }
+    .load-btn:hover { background:#2e6318; }
+    .no-results { color:#999; font-size:13px; padding:16px 0; text-align:center; }
+    .loading { color:#6a9050; font-size:13px; padding:12px 0; text-align:center; }
+    .pay-now-btn { padding:4px 12px; background:#3a7d20; color:#fff; border:none; border-radius:12px; font-size:11px; font-weight:700; cursor:pointer; }
+    .pay-now-btn:hover { background:#2e6318; }
+    .chip-row { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+    .chip { background:#f0f9ea; border:1.5px solid #b8df9f; border-radius:10px; padding:12px 18px; flex:1; min-width:110px; text-align:center; }
+    .chip.red { background:#fde8e8; border-color:#f5c6c6; }
+    .chip-label { font-size:11px; font-weight:700; text-transform:uppercase; color:#6a9050; margin-bottom:4px; }
+    .chip.red .chip-label { color:#c0392b; }
+    .chip-value { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:#3a7d20; }
+    .chip.red .chip-value { color:#c0392b; }
+    .filter-row { display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:flex-end; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; }
+    .filter-group label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#6a9050; }
+    .filter-group select { padding:9px 12px; border-radius:8px; border:1.5px solid #ccc; font-size:13px; font-family:inherit; min-width:180px; outline:none; }
+    .filter-group select:focus { border-color:#7abb57; }
+  </style>
+</head>
+<body>
+  <div class="top-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 0;">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+            <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <a href="/manager/clients" class="nav-btn">Clients</a>
+      <a href="/manager/estimates" class="nav-btn">Estimates</a>
+      <a href="/manager/contracts" class="nav-btn">Contracts</a>
+      <a href="/manager/billing"class="nav-btn active">Billing</a>
+      <a href="/manager/reports" class="nav-btn">Reports</a>
+      <a href="/manager/employees" class="nav-btn">Employees</a>
+      <a href="/manager/jobcosting" class="nav-btn">Job Costing</a>
+      <a href="/manager/home" class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="page-banner">
+    <div><h1>Billing</h1><p>Create invoices, record payments, and review all invoice records</p></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ══ SECTION 1: CREATE NEW INVOICE ══ -->
+    <div class="billing-card" id="create-invoice-card">
+      <h3>🧾 Create New Invoice</h3>
+      <p class="desc">Enter the invoice details below. The status is calculated automatically — Unpaid if nothing has been paid, Partial if partially paid, Paid if fully paid. Saved directly to the database.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client</label>
+          <select id="inv-client" onchange="loadContractsForClient()">
+            <option value="">— Select Client —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Contract (optional)</label>
+          <select id="inv-contract" onchange="handleContractChange()">
+            <option value="">— None / Select Contract —</option>
+            <option value="NEW">➕ New Contract</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Invoice Date</label>
+          <input type="date" id="inv-date"/>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="inv-due"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Total Amount ($)</label>
+          <input type="number" id="inv-total" placeholder="0.00" step="0.01" oninput="updateStatusPreview()"/>
+        </div>
+        <div class="form-group">
+          <label>Amount Already Paid ($)</label>
+          <input type="number" id="inv-paid" placeholder="0.00" step="0.01" value="0" oninput="updateStatusPreview()"/>
+        </div>
+      </div>
+
+      <!-- New Contract inline form (shown when "New Contract" is selected) -->
+      <div id="new-contract-panel" style="display:none;background:#f0f9ea;border:1.5px solid #b8df9f;border-radius:10px;padding:16px 18px;margin-bottom:16px;">
+        <div style="font-size:13px;font-weight:700;color:#3a7d20;margin-bottom:12px;">📄 Create New Contract</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Linked Estimate ID (optional)</label>
+            <input type="number" id="nc-estimate" placeholder="Enter Estimate ID (e.g. 3)" min="1" step="1" oninput="previewEstimateById()"/>
+            <span style="font-size:11px;color:#999;margin-top:3px;display:block;">Type a numeric Estimate ID to link this contract to an existing estimate</span>
+          </div>
+          <div class="form-group">
+            <label>&nbsp;</label>
+            <div id="nc-estimate-preview" style="padding:9px 12px;border-radius:8px;background:#fff;border:1.5px solid #eee;font-size:12px;color:#888;min-height:40px;">
+              Select an estimate to preview its details
+            </div>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Start Date</label>
+            <input type="date" id="nc-start"/>
+          </div>
+          <div class="form-group">
+            <label>End Date</label>
+            <input type="date" id="nc-end"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pricing ($)</label>
+            <input type="number" id="nc-price" placeholder="0.00" step="0.01"/>
+          </div>
+          <div class="form-group">
+            <label>Duration</label>
+            <select id="nc-duration">
+              <option>1 month</option><option>2 months</option>
+              <option>3 months</option><option>6 months</option>
+              <option>12 months</option><option>Ongoing</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row" style="grid-template-columns:1fr;">
+          <div class="form-group">
+            <label>Service Scope</label>
+            <textarea id="nc-scope" rows="2" placeholder="Describe the services covered by this contract..."></textarea>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="btn-primary" style="padding:8px 18px;font-size:12px;" onclick="saveNewContract()">💾 Save Contract First</button>
+          <button class="btn-secondary" style="padding:8px 18px;font-size:12px;" onclick="cancelNewContract()">Cancel</button>
+        </div>
+        <div id="nc-status" style="font-size:12px;margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- Live status preview -->
+      <div style="margin-bottom:16px;">
+        <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6a9050;display:block;margin-bottom:6px;">Invoice Status (auto-calculated)</label>
+        <div class="status-indicator" id="status-preview">
+          <span id="status-badge">—</span>
+          <span id="status-desc" style="font-weight:400;color:#777;font-size:12px;">Enter amounts above</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" onclick="submitInvoice()">💾 Save Invoice to Database</button>
+        <button class="btn-secondary" onclick="clearInvoiceForm()">Clear</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 2: RECORD PAYMENT ══ -->
+    <div class="billing-card" id="payment-card">
+      <h3>💳 Record Payment on Existing Invoice</h3>
+      <p class="desc">Select a client to load their invoices, review the balance, then record a payment. The invoice status and amount paid update automatically in the database.</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Client</label>
+          <select id="pay-client" onchange="loadClientInvoices()">
+            <option value="">— Select Client —</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Invoice</label>
+          <select id="pay-invoice" onchange="previewInvoice()">
+            <option value="">— Select Invoice —</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="invoice-preview" id="inv-preview">
+        <h4>📄 Invoice Details</h4>
+        <div class="inv-detail">
+          <span>Total Billed: <strong id="prev-total">—</strong></span>
+          <span>Already Paid: <strong id="prev-paid">—</strong></span>
+          <span>Balance Due: <strong id="prev-balance">—</strong></span>
+          <span>Status: <strong id="prev-status">—</strong></span>
+          <span>Invoice Date: <strong id="prev-date">—</strong></span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Payment Amount ($)</label>
+          <input type="number" id="pay-amount" placeholder="0.00" step="0.01"/>
+        </div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="pay-method">
+            <option>Check</option><option>Cash</option>
+            <option>Credit Card</option><option>Bank Transfer</option>
+            <option>Venmo / Zelle</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Payment Date</label>
+          <input type="date" id="pay-date"/>
+        </div>
+        <div class="form-group">
+          <label>Due Date (reference)</label>
+          <input type="date" id="pay-due"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="submitPayment()">💾 Record Payment to Database</button>
+        <button class="btn-secondary" onclick="clearPayment()">Clear</button>
+      </div>
+    </div>
+
+    <!-- ══ SECTION 3: ALL INVOICES TABLE ══ -->
+    <div class="billing-card">
+      <h3>📋 All Invoices</h3>
+      <p class="desc">Full list of every invoice in the database. Use the filters to narrow by client or status. Click <strong>Pay Now</strong> on any open invoice to jump straight to the payment form.</p>
+
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>Filter by Client</label>
+          <select id="tbl-client" onchange="renderTable()">
+            <option value="">— All Clients —</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Filter by Status</label>
+          <select id="tbl-status" onchange="renderTable()">
+            <option value="">— All Statuses —</option>
+            <option value="Paid">Paid</option>
+            <option value="Partial">Partial</option>
+            <option value="Unpaid">Unpaid</option>
+          </select>
+        </div>
+        <button class="load-btn" onclick="loadAllInvoices(this)" style="align-self:flex-end;">Load All Invoices</button>
+      </div>
+
+      <div id="all-invoices-result"><p class="no-results">Click "Load All Invoices" to view the full list.</p></div>
+    </div>
+
+  </div>
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+  <div class="toast" id="toast"></div>
+
+<script>
+function fmt(n) { return parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2}); }
+let invoiceData = [];
+let allInvoices = [];
+
+function showToast(msg, err=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast'+(err?' error':'');
+  t.style.display = 'block';
+  setTimeout(() => t.style.display='none', 4000);
+}
+
+// Default dates
+document.getElementById('inv-date').valueAsDate = new Date();
+document.getElementById('pay-date').valueAsDate = new Date();
+const due = new Date(); due.setDate(due.getDate()+15);
+document.getElementById('inv-due').valueAsDate = due;
+
+// ── Load all dropdowns ───────────────────────────────────────
+async function loadDropdowns() {
+  const clients = await fetch('/api/clients-list').then(r=>r.json()).catch(()=>[]);
+  ['inv-client','pay-client','tbl-client'].forEach(id => {
+    const sel = document.getElementById(id);
+    clients.forEach(c => {
+      const o = document.createElement('option');
+      o.value = c.Client_ID;
+      o.textContent = id==='tbl-client'
+        ? c.Client_Name
+        : `${c.Client_Name} (ID: ${c.Client_ID})`;
+      sel.appendChild(o);
+    });
+  });
+}
+
+// ══ SECTION 1: CREATE INVOICE ════════════════════════════════
+
+async function loadContractsForClient() {
+  const cid  = document.getElementById('inv-client').value;
+  const csel = document.getElementById('inv-contract');
+  csel.innerHTML = '<option value="">— None / Select Contract —</option>';
+
+  // Always keep New Contract option
+  const newOpt = document.createElement('option');
+  newOpt.value = 'NEW'; newOpt.textContent = '➕ New Contract';
+  csel.appendChild(newOpt);
+
+  // Hide new contract panel when client changes
+  document.getElementById('new-contract-panel').style.display = 'none';
+
+  if (!cid) return;
+
+  const all = await fetch('/api/contracts-list').then(r=>r.json()).catch(()=>[]);
+  const clientName = document.getElementById('inv-client').selectedOptions[0].textContent.split(' (ID')[0];
+  all.filter(c => c.Client_Name === clientName).forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.Contract_ID;
+    o.textContent = `Contract #${c.Contract_ID} — ${c.Service_Scope} — $${fmt(c.Pricing)}`;
+    csel.appendChild(o);
+  });
+}
+
+function handleContractChange() {
+  const val = document.getElementById('inv-contract').value;
+  const panel = document.getElementById('new-contract-panel');
+  panel.style.display = val === 'NEW' ? 'block' : 'none';
+  if (val === 'NEW') { document.getElementById('nc-estimate').value=''; document.getElementById('nc-estimate-preview').innerHTML='Type an Estimate ID to preview its details'; }
+  const st = document.getElementById('nc-status');
+  st.style.display='none'; st.textContent='';
+}
+
+// Estimate lookup now done by ID input via previewEstimateById()
+
+// Preview estimate by ID (typed in input)
+async function previewEstimateById() {
+  const estId  = document.getElementById('nc-estimate').value.trim();
+  const preview = document.getElementById('nc-estimate-preview');
+  if (!estId) { preview.innerHTML = 'Type an Estimate ID to preview its details'; return; }
+  preview.innerHTML = '<span style="color:#6a9050;font-size:12px;">⏳ Looking up estimate...</span>';
+  const all = await fetch('/api/all-estimates').then(r=>r.json()).catch(()=>[]);
+  const est = all.find(e => String(e.Estimate_ID) === String(estId));
+  if (!est) { preview.innerHTML = '<span style="color:#c0392b;font-size:12px;">Estimate ID not found. Check the ID and try again.</span>'; return; }
+  const cost  = parseFloat(est.Estimated_Cost || 0);
+  const hours = parseFloat(est.Estimated_Labor_Hours || 0);
+  preview.innerHTML = `
+    <div style="color:#3a7d20;font-weight:700;font-size:12px;margin-bottom:6px;">EST-${est.Estimate_ID} Found</div>
+    <div style="color:#555;font-size:12px;line-height:1.7;">
+      <strong>Client:</strong> ${est.Client_Name}<br>
+      <strong>Cost:</strong> $${cost.toLocaleString('en-US',{minimumFractionDigits:2})}<br>
+      <strong>Hours:</strong> ${hours} hrs<br>
+      <strong>Date:</strong> ${est.Estimate_Date || '—'}<br>
+      <strong>Scope:</strong> ${est.Service_Description || '—'}
+    </div>`;
+  if (cost > 0) document.getElementById('nc-price').value = cost.toFixed(2);
+  if (est.Service_Description) document.getElementById('nc-scope').value = est.Service_Description;
+}
+
+async function saveNewContract() {
+  const clientId   = document.getElementById('inv-client').value;
+  if (!clientId) { showToast('Please select a client first.', true); return; }
+
+  const estimateId = document.getElementById('nc-estimate').value;
+  const start      = document.getElementById('nc-start').value;
+  const end        = document.getElementById('nc-end').value;
+  const price      = parseFloat(document.getElementById('nc-price').value);
+  const scope      = document.getElementById('nc-scope').value.trim();
+
+  if (!start || !end)    { showToast('Please enter contract start and end dates.', true); return; }
+  if (!price || price<=0){ showToast('Please enter a valid contract price.', true); return; }
+  if (!scope)            { showToast('Please enter a service scope description.', true); return; }
+
+  const body = {
+    client_id:     clientId,
+    estimate_id:   estimateId || null,
+    start_date:    start,
+    end_date:      end,
+    pricing:       price,
+    duration:      document.getElementById('nc-duration').value,
+    service_scope: scope
+  };
+
+  const res = await fetch('/submit/contract', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+
+  const st = document.getElementById('nc-status');
+  if (res.success) {
+    st.style.cssText='display:block;color:#2e6318;font-weight:700;';
+    st.textContent = estimateId
+      ? `✅ Contract saved and linked to EST-${estimateId}!`
+      : '✅ Contract saved to database!';
+    await loadContractsForClient();
+    const csel = document.getElementById('inv-contract');
+    if (csel.options.length > 2) csel.selectedIndex = csel.options.length - 1;
+    document.getElementById('new-contract-panel').style.display='none';
+    showToast(estimateId ? `✅ Contract created and linked to EST-${estimateId}!` : '✅ New contract saved!');
+  } else {
+    st.style.cssText='display:block;color:#c0392b;font-weight:700;';
+    st.textContent='❌ '+res.message;
+  }
+}
+
+function cancelNewContract() {
+  document.getElementById('inv-contract').value = '';
+  document.getElementById('new-contract-panel').style.display='none';
+  ['nc-start','nc-end','nc-price','nc-scope'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value='';
+  });
+  document.getElementById('nc-estimate').value = '';
+  document.getElementById('nc-estimate-preview').innerHTML = 'Type an Estimate ID to preview its details';
+}
+
+function updateStatusPreview() {
+  const total = parseFloat(document.getElementById('inv-total').value) || 0;
+  const paid  = parseFloat(document.getElementById('inv-paid').value)  || 0;
+  const badge = document.getElementById('status-badge');
+  const desc  = document.getElementById('status-desc');
+  const box   = document.getElementById('status-preview');
+
+  if (!total) {
+    badge.innerHTML='—'; desc.textContent='Enter amounts above';
+    box.style.cssText='background:#f0f9ea;border-color:#b8df9f;';
+    return;
+  }
+
+  let status, bg, border, tc, descText;
+  if (paid <= 0)       { status='Unpaid';  bg='#fde8e8'; border='#f5a0a0'; tc='#c0392b'; descText=`$${fmt(total)} due — nothing paid yet.`; }
+  else if (paid>=total){ status='Paid';    bg='#d4f0bb'; border='#7abb57'; tc='#2e6318'; descText=`Fully paid — $${fmt(paid)} collected.`; }
+  else                 { status='Partial'; bg='#fff3cd'; border='#f0c040'; tc='#856404'; descText=`$${fmt(paid)} paid, $${fmt(total-paid)} still owed.`; }
+
+  badge.innerHTML = `<span class="badge" style="background:${bg};color:${tc};">${status}</span>`;
+  desc.textContent = descText;
+  box.style.cssText = `background:${bg};border:1.5px solid ${border};display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;`;
+}
+
+async function submitInvoice() {
+  const clientId   = document.getElementById('inv-client').value;
+  const contractId = document.getElementById('inv-contract').value;
+  const invDate    = document.getElementById('inv-date').value;
+  const dueDate    = document.getElementById('inv-due').value;
+  const total      = parseFloat(document.getElementById('inv-total').value);
+  const paid       = parseFloat(document.getElementById('inv-paid').value) || 0;
+
+  if (!clientId)       { showToast('Please select a client.', true); return; }
+  if (!invDate)        { showToast('Please enter an invoice date.', true); return; }
+  if (!dueDate)        { showToast('Please enter a due date.', true); return; }
+  if (!total || total<=0) { showToast('Please enter a valid total amount.', true); return; }
+
+  const res = await fetch('/submit/invoice', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ client_id:clientId, contract_id:contractId||null, invoice_date:invDate, due_date:dueDate, total_amount:total, amount_paid:paid })
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+
+  if (res.success) {
+    showToast(`✅ Invoice created! Status: ${res.status_set}`);
+    clearInvoiceForm();
+  } else {
+    showToast('❌ '+res.message, true);
+  }
+}
+
+function clearInvoiceForm() {
+  document.getElementById('inv-client').value = '';
+  document.getElementById('inv-contract').innerHTML = '<option value="">— None / Select Contract —</option>';
+  document.getElementById('inv-date').valueAsDate = new Date();
+  const d=new Date(); d.setDate(d.getDate()+15);
+  document.getElementById('inv-due').valueAsDate = d;
+  document.getElementById('inv-total').value = '';
+  document.getElementById('inv-paid').value  = '0';
+  updateStatusPreview();
+}
+
+// ══ SECTION 2: RECORD PAYMENT ════════════════════════════════
+
+async function loadClientInvoices() {
+  const cid  = document.getElementById('pay-client').value;
+  const isel = document.getElementById('pay-invoice');
+  isel.innerHTML = '<option value="">— Select Invoice —</option>';
+  document.getElementById('inv-preview').style.display='none';
+  invoiceData=[];
+  if (!cid) return;
+
+  invoiceData = await fetch(`/api/invoices-by-client?client_id=${cid}`).then(r=>r.json()).catch(()=>[]);
+  invoiceData.forEach(i => {
+    const o = document.createElement('option');
+    o.value = i.Invoice_ID;
+    const balance = parseFloat(i.Total_Amount||0)-parseFloat(i.Amount_Paid||0);
+    o.textContent = i.Invoice_Status==='Paid'
+      ? `INV-${i.Invoice_ID} | ✅ Paid | ${i.Invoice_Date}`
+      : `INV-${i.Invoice_ID} | ${i.Invoice_Status} | Balance: $${fmt(balance)} | ${i.Invoice_Date}`;
+    if (i.Invoice_Status==='Paid') o.style.color='#aaa';
+    isel.appendChild(o);
+  });
+}
+
+function previewInvoice() {
+  const invId = document.getElementById('pay-invoice').value;
+  const prev  = document.getElementById('inv-preview');
+  if (!invId) { prev.style.display='none'; return; }
+  const inv = invoiceData.find(i=>String(i.Invoice_ID)===String(invId));
+  if (!inv)  { prev.style.display='none'; return; }
+
+  const balance = parseFloat(inv.Total_Amount||0)-parseFloat(inv.Amount_Paid||0);
+  const sc = inv.Invoice_Status==='Paid'?'badge-paid':inv.Invoice_Status==='Unpaid'?'badge-unpaid':'badge-partial';
+  document.getElementById('prev-total').textContent   = '$'+fmt(inv.Total_Amount);
+  document.getElementById('prev-paid').textContent    = '$'+fmt(inv.Amount_Paid);
+  document.getElementById('prev-balance').textContent = '$'+fmt(balance);
+  document.getElementById('prev-date').textContent    = inv.Invoice_Date;
+  document.getElementById('prev-status').innerHTML    = `<span class="badge ${sc}">${inv.Invoice_Status}</span>`;
+  if (balance>0) document.getElementById('pay-amount').value = balance.toFixed(2);
+  if (inv.Due_Date) document.getElementById('pay-due').value = inv.Due_Date;
+  prev.style.display='block';
+}
+
+async function submitPayment() {
+  const invId = document.getElementById('pay-invoice').value;
+  const inv   = invoiceData.find(i=>String(i.Invoice_ID)===String(invId));
+  if (!invId||!inv) { showToast('Please select a client and invoice.', true); return; }
+  const amount = parseFloat(document.getElementById('pay-amount').value);
+  if (!amount||amount<=0) { showToast('Please enter a valid payment amount.', true); return; }
+
+  const res = await fetch('/submit/payment', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ contract_id:inv.Contract_ID||null, invoice_id:invId, payment_amount:amount, payment_method:document.getElementById('pay-method').value, payment_date:document.getElementById('pay-date').value, due_date:document.getElementById('pay-due').value||null })
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+
+  showToast(res.success?'✅ Payment recorded! Invoice updated.':'❌ '+res.message, !res.success);
+  if (res.success) clearPayment();
+}
+
+function clearPayment() {
+  document.getElementById('pay-client').value='';
+  document.getElementById('pay-invoice').innerHTML='<option value="">— Select Invoice —</option>';
+  document.getElementById('pay-amount').value='';
+  document.getElementById('pay-due').value='';
+  document.getElementById('inv-preview').style.display='none';
+  invoiceData=[];
+}
+
+// ══ SECTION 3: ALL INVOICES TABLE ════════════════════════════
+
+async function loadAllInvoices(btn) {
+  btn.disabled=true; btn.textContent='⏳ Loading...';
+  document.getElementById('all-invoices-result').innerHTML='<p class="loading">⏳ Loading all invoices...</p>';
+  allInvoices = await fetch('/api/all-invoices').then(r=>r.json()).catch(()=>[]);
+  btn.disabled=false; btn.textContent='Refresh';
+  renderTable();
+}
+
+function renderTable() {
+  const clientFilter = document.getElementById('tbl-client').value;
+  const statusFilter = document.getElementById('tbl-status').value;
+  const el = document.getElementById('all-invoices-result');
+
+  if (!allInvoices.length) {
+    el.innerHTML='<p class="no-results">Click "Load All Invoices" above to view records.</p>'; return;
+  }
+
+  let rows = allInvoices;
+  if (clientFilter) rows = rows.filter(r=>String(r.Client_ID)===String(clientFilter));
+  if (statusFilter) rows = rows.filter(r=>r.Invoice_Status===statusFilter);
+
+  if (!rows.length) { el.innerHTML='<p class="no-results">No invoices match those filters.</p>'; return; }
+
+  const totalBilled    = rows.reduce((s,r)=>s+parseFloat(r.Total_Amount||0),0);
+  const totalCollected = rows.reduce((s,r)=>s+parseFloat(r.Amount_Paid||0),0);
+  const totalBalance   = rows.reduce((s,r)=>s+parseFloat(r.Balance_Due||0),0);
+
+  let html = `<div class="chip-row">
+    <div class="chip"><div class="chip-label">Invoices</div><div class="chip-value">${rows.length}</div></div>
+    <div class="chip"><div class="chip-label">Total Billed</div><div class="chip-value">$${fmt(totalBilled)}</div></div>
+    <div class="chip"><div class="chip-label">Total Collected</div><div class="chip-value">$${fmt(totalCollected)}</div></div>
+    <div class="chip red"><div class="chip-label">Total Outstanding</div><div class="chip-value">$${fmt(totalBalance)}</div></div>
+  </div>
+  <div class="results-wrap"><table class="results-table"><thead><tr>
+    <th>Invoice ID</th><th>Client</th><th>Contract</th>
+    <th>Invoice Date</th><th>Due Date</th>
+    <th>Total Billed</th><th>Amount Paid</th><th>Balance Due</th>
+    <th>Status</th><th>Action</th>
+  </tr></thead><tbody>`;
+
+  rows.forEach(r => {
+    const sc  = r.Invoice_Status==='Paid'?'badge-paid':r.Invoice_Status==='Unpaid'?'badge-unpaid':'badge-partial';
+    const bal = parseFloat(r.Balance_Due||0);
+    html += `<tr>
+      <td><strong>INV-${r.Invoice_ID}</strong></td>
+      <td>${r.Client_Name}</td>
+      <td>${r.Contract_ID?'#'+r.Contract_ID:'—'}</td>
+      <td>${r.Invoice_Date}</td>
+      <td>${r.Due_Date||'—'}</td>
+      <td class="money">$${fmt(r.Total_Amount)}</td>
+      <td class="money">$${fmt(r.Amount_Paid)}</td>
+      <td class="${bal>0?'money-red':'money'}">$${fmt(bal)}</td>
+      <td><span class="badge ${sc}">${r.Invoice_Status}</span></td>
+      <td>${r.Invoice_Status!=='Paid'
+        ? `<button class="pay-now-btn" onclick="jumpToPayment(${r.Client_ID},${r.Invoice_ID})">Pay Now</button>`
+        : '—'}</td>
+    </tr>`;
+  });
+
+  html += `<tr class="totals-row">
+    <td colspan="5"><strong>TOTAL (${rows.length} invoices)</strong></td>
+    <td class="money">$${fmt(totalBilled)}</td>
+    <td class="money">$${fmt(totalCollected)}</td>
+    <td class="money-red">$${fmt(totalBalance)}</td>
+    <td colspan="2">—</td>
+  </tr></tbody></table></div>`;
+  el.innerHTML=html;
+}
+
+async function jumpToPayment(clientId, invoiceId) {
+  document.getElementById('pay-client').value = clientId;
+  await loadClientInvoices();
+  document.getElementById('pay-invoice').value = invoiceId;
+  previewInvoice();
+  document.getElementById('payment-card').scrollIntoView({behavior:'smooth'});
+}
+
+loadDropdowns();
+</script>
+</body>
+</html>

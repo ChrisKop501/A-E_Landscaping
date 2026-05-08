@@ -1,0 +1,330 @@
+/* =====================
+   PAGE HEADER BANNER
+   ===================== */
+
+.page-banner {
+  background: linear-gradient(135deg, var(--db-green-dark) 0%, var(--db-green-mid) 100%);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.page-banner h1 {
+  font-family: 'Playfair Display', serif;
+  color: var(--white);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.page-banner p {
+  color: rgba(255,255,255,0.8);
+  font-size: 13px;
+  margin-top: 3px;
+}
+
+/* =====================
+   TOOLBAR (search + add)
+   ===================== */
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  padding: 9px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #ccc;
+  font-size: 14px;
+  width: 260px;
+  outline: none;
+  font-family: inherit;
+}
+
+.search-input:focus { border-color: var(--db-green-mid); }
+
+/* =====================
+   DATA TABLE CARD
+   ===================== */
+
+.table-card {
+  background: var(--white);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  margin-bottom: 24px;
+}
+
+.table-card table {
+  border-radius: 0;
+}
+
+.table-card th {
+  background: var(--db-green-light);
+  color: var(--db-green-dark);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 12px 14px;
+}
+
+.table-card td {
+  padding: 11px 14px;
+  font-size: 14px;
+  color: #333;
+}
+
+.table-card tr:hover td { background: #f7fdf4; }
+
+/* =====================
+   STATUS BADGES
+   ===================== */
+
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-active   { background: #d4f0bb; color: #2e6318; }
+.badge-inactive { background: #f0f0f0; color: #888; }
+.badge-paid     { background: #d4f0bb; color: #2e6318; }
+.badge-unpaid   { background: #fde8e8; color: #c0392b; }
+.badge-pending  { background: #fff3cd; color: #856404; }
+.badge-complete { background: #d4f0bb; color: #2e6318; }
+
+/* =====================
+   ROW ACTION BUTTONS
+   ===================== */
+
+.row-actions { display: flex; gap: 6px; }
+
+.action-btn {
+  padding: 4px 12px;
+  border-radius: 12px;
+  border: 1.5px solid #ccc;
+  background: var(--white);
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.12s;
+}
+
+.action-btn:hover {
+  background: var(--db-green-dark);
+  color: var(--white);
+  border-color: var(--db-green-dark);
+}
+
+/* =====================
+   SUMMARY CARDS (billing/reports)
+   ===================== */
+
+.summary-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.summary-card {
+  background: var(--white);
+  border: 2px solid var(--db-green-light);
+  border-radius: 12px;
+  padding: 16px 20px;
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+}
+
+.summary-card .s-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6a9050;
+  margin-bottom: 5px;
+}
+
+.summary-card .s-value {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--db-green-dark);
+}
+
+/* =====================
+   FORM PANEL
+   ===================== */
+
+.form-panel {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.form-panel h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--db-green-dark);
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #6a9050;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #ccc;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: #fafafa;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--db-green-mid);
+  background: var(--white);
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+/* =====================
+   CHART / REPORT AREA
+   ===================== */
+
+.report-chart {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.report-chart h3 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--db-green-dark);
+  margin-bottom: 16px;
+}
+
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 160px;
+  padding-bottom: 4px;
+}
+
+.bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  flex: 1;
+}
+
+.bar {
+  width: 100%;
+  max-width: 50px;
+  background: var(--db-green-mid);
+  border-radius: 4px 4px 0 0;
+}
+
+.bar-col span {
+  font-size: 11px;
+  color: #999;
+  font-weight: 600;
+}
+
+/* =====================
+   CUSTOMER VIEW (services page)
+   ===================== */
+
+.customer-banner {
+  background: linear-gradient(135deg, #2d5a27 0%, #4a7c42 100%);
+  padding: 28px 24px;
+  text-align: center;
+}
+
+.customer-banner h1 {
+  font-family: 'Playfair Display', serif;
+  color: var(--white);
+  font-size: 24px;
+  margin-bottom: 6px;
+}
+
+.customer-banner p {
+  color: rgba(255,255,255,0.82);
+  font-size: 14px;
+}
+
+.service-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.service-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 20px;
+  border: 1.5px solid var(--db-green-light);
+  text-align: center;
+}
+
+.service-card .svc-icon { font-size: 32px; margin-bottom: 10px; }
+.service-card h3 { font-size: 15px; font-weight: 700; color: var(--db-green-dark); margin-bottom: 6px; }
+.service-card p  { font-size: 13px; color: #666; line-height: 1.5; }
+
+/* =====================
+   RESPONSIVE
+   ===================== */
+
+@media (max-width: 700px) {
+  .form-row { grid-template-columns: 1fr; }
+  .summary-row { gap: 10px; }
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .search-input { width: 100%; }
+}

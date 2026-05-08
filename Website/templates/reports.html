@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Reports</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/pages.css"/>
+  <style>
+    .rpt-section { background:#fff; border-radius:14px; border:1px solid #ddd; padding:24px; margin-bottom:28px; }
+    .rpt-section h3 { font-family:'Playfair Display',serif; font-size:18px; color:#3a7d20; margin-bottom:6px; }
+    .rpt-section .desc { font-size:13px; color:#888; margin-bottom:18px; }
+    .filter-row { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:18px; }
+    .filter-group { display:flex; flex-direction:column; gap:4px; }
+    .filter-group label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#6a9050; }
+    .filter-group select, .filter-group input {
+      padding:9px 12px; border-radius:8px; border:1.5px solid #ccc;
+      font-size:14px; font-family:inherit; outline:none; min-width:140px;
+    }
+    .filter-group select:focus, .filter-group input:focus { border-color:#7abb57; }
+    .run-btn { padding:10px 22px; background:#3a7d20; color:#fff; border:none; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; align-self:flex-end; }
+    .run-btn:hover { background:#2e6318; }
+    .results-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .results-table th { background:#b8df9f; color:#3a7d20; padding:10px 12px; text-align:left; font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+    .results-table td { padding:10px 12px; border-bottom:1px solid #f0f0f0; color:#333; }
+    .results-table tr:hover td { background:#f7fdf4; }
+    .results-wrap { border-radius:10px; overflow:hidden; border:1px solid #ddd; }
+    .no-results { color:#999; font-size:13px; padding:16px 0; text-align:center; }
+    .loading { color:#6a9050; font-size:13px; padding:12px 0; }
+    .badge { display:inline-block; padding:2px 9px; border-radius:10px; font-size:11px; font-weight:700; text-transform:uppercase; }
+    .badge-paid    { background:#d4f0bb; color:#2e6318; }
+    .badge-unpaid  { background:#fde8e8; color:#c0392b; }
+    .badge-partial { background:#fff3cd; color:#856404; }
+    .money { font-weight:700; color:#3a7d20; }
+    .money-red { font-weight:700; color:#c0392b; }
+    .totals-row td { background:#f0f9ea; font-weight:700; }
+    .aging-current  { background:#d4f0bb; color:#2e6318; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+    .aging-30       { background:#fff3cd; color:#856404; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+    .aging-60       { background:#ffe0b2; color:#e65100; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+    .aging-old      { background:#fde8e8; color:#c0392b; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+    .over-budget  { color:#c0392b; font-weight:700; }
+    .under-budget { color:#2e6318; font-weight:700; }
+    .on-budget    { color:#856404; font-weight:700; }
+    .summary-strip { display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap; }
+    .summary-chip { background:#f0f9ea; border:1.5px solid #b8df9f; border-radius:10px; padding:12px 18px; flex:1; min-width:120px; text-align:center; }
+    .chip-label { font-size:11px; font-weight:700; text-transform:uppercase; color:#6a9050; margin-bottom:4px; }
+    .chip-value { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:#3a7d20; }
+  </style>
+</head>
+<body>
+  <div class="top-area">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px 0 0;">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+            <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <a href="/manager/clients" class="nav-btn">Clients</a>
+      <a href="/manager/estimates" class="nav-btn">Estimates</a>
+      <a href="/manager/contracts" class="nav-btn">Contracts</a>
+      <a href="/manager/billing" class="nav-btn">Billing</a>
+      <a href="/manager/reports"class="nav-btn active">Reports</a>
+      <a href="/manager/employees" class="nav-btn">Employees</a>
+      <a href="/manager/jobcosting" class="nav-btn">Job Costing</a>
+      <a href="/manager/home" class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="page-banner">
+    <div><h1>Reports</h1><p>Monthly revenue, outstanding invoices, and job costing analysis</p></div>
+  </div>
+
+  <div class="main">
+
+    <!-- ── REPORT 1: Monthly Revenue ── -->
+    <div class="rpt-section">
+      <h3>📅 Monthly Revenue Report</h3>
+      <p class="desc">Add one or more month/year combinations to compare revenue across multiple periods. Each report loads as its own panel below.</p>
+
+      <!-- Add report row -->
+      <div class="filter-row" style="align-items:flex-end;">
+        <div class="filter-group">
+          <label>Month</label>
+          <select id="rev-month">
+            <option value="">— All Months —</option>
+            <option value="1">January</option><option value="2">February</option>
+            <option value="3">March</option><option value="4">April</option>
+            <option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option>
+            <option value="9">September</option><option value="10">October</option>
+            <option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Year</label>
+          <select id="rev-year">
+            <option value="">— All Years —</option>
+            <option value="2024">2024</option>
+            <option value="2025" selected>2025</option>
+          </select>
+        </div>
+        <button class="run-btn" onclick="addMonthlyReport()">+ Add Report</button>
+        <button class="run-btn" style="background:#888;" onclick="clearAllReports()">Clear All</button>
+      </div>
+
+      <!-- Active report pills -->
+      <div id="report-pills" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+
+      <!-- All report panels stacked here -->
+      <div id="monthly-reports-container">
+        <p class="no-results">Select a month/year and click + Add Report to load a report.</p>
+      </div>
+
+      <!-- Grand Total across all loaded periods -->
+      <div id="grand-total-bar" style="display:none;background:#1a2e10;border-radius:12px;padding:18px 22px;margin-top:18px;">
+        <div style="color:#b8df9f;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;">
+          Grand Total — <span id="gt-periods"></span>
+        </div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;">
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:#6a9050;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Total Invoices</div>
+            <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#fff;" id="gt-invoices">0</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:#6a9050;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Total Billed</div>
+            <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#7abb57;" id="gt-billed">$0.00</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:#6a9050;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Total Collected</div>
+            <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#7abb57;" id="gt-collected">$0.00</div>
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:11px;color:#6a9050;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Total Outstanding</div>
+            <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;" id="gt-outstanding">$0.00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REPORT 2: Outstanding Invoices ── -->
+    <div class="rpt-section">
+      <h3>⚠️ Outstanding Invoice Report</h3>
+      <p class="desc">All unpaid and partially paid invoices, grouped by aging bucket — current, 1–30 days, 31–60 days, and 60+ days overdue.</p>
+      <button class="run-btn" onclick="loadOutstanding(this)">Load Outstanding Invoices</button>
+      <div id="outstanding-summary" style="margin:16px 0;"></div>
+      <div id="outstanding-results" style="margin-top:10px;"><p class="no-results">Click the button to load outstanding invoices.</p></div>
+    </div>
+
+    <!-- ── REPORT 4: Job Costing ── -->
+    <div class="rpt-section">
+      <h3>🔧 Job Costing Report</h3>
+      <p class="desc">Compare estimated vs. actual costs per job. Filter by Estimate ID to see costing for a specific estimate. Shows variance, budget status, and grand totals.</p>
+      <div class="filter-row" style="margin-bottom:16px;">
+        <div class="filter-group">
+          <label>Filter by Estimate ID (optional)</label>
+          <input type="number" id="jc-estimate-filter" placeholder="Enter Estimate ID (e.g. 3)" min="1" step="1" style="padding:9px 12px;border-radius:8px;border:1.5px solid #ccc;font-size:13px;font-family:inherit;min-width:220px;outline:none;"/>
+        </div>
+        <button class="run-btn" onclick="loadJobCosting(this)">Load Job Costing</button>
+        <button class="run-btn" style="background:#888;" onclick="document.getElementById('jc-estimate-filter').value='';loadJobCosting(this)">Show All</button>
+      </div>
+      <div id="costing-summary" style="margin:16px 0;"></div>
+      <div id="costing-results" style="margin-top:10px;"><p class="no-results">Click the button to load job costing data.</p></div>
+    </div>
+
+  </div>
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+
+<script>
+function fmt(n) { return parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2}); }
+const MONTHS = ['','January','February','March','April','May','June','July','August','September','October','November','December'];
+
+// Tracks loaded reports and their totals for grand total calculation
+const loadedReports = {};  // key -> {billed, collected, count}
+
+// ── Update grand total bar across all loaded reports ─────────
+function updateGrandTotal() {
+  const keys = Object.keys(loadedReports);
+  const grandEl = document.getElementById('grand-total-bar');
+  if (!keys.length) { grandEl.style.display='none'; return; }
+
+  let totalBilled=0, totalCollected=0, totalInvoices=0;
+  keys.forEach(k => {
+    totalBilled    += loadedReports[k].billed    || 0;
+    totalCollected += loadedReports[k].collected || 0;
+    totalInvoices  += loadedReports[k].count     || 0;
+  });
+  const totalOutst = totalBilled - totalCollected;
+
+  grandEl.style.display = 'flex';
+  document.getElementById('gt-invoices').textContent  = totalInvoices;
+  document.getElementById('gt-billed').textContent    = '$' + fmt(totalBilled);
+  document.getElementById('gt-collected').textContent = '$' + fmt(totalCollected);
+  document.getElementById('gt-outstanding').textContent = '$' + fmt(totalOutst);
+  document.getElementById('gt-outstanding').style.color = totalOutst > 0 ? '#c0392b' : '#2e6318';
+  document.getElementById('gt-periods').textContent = keys.length + ' period' + (keys.length>1?'s':'') + ' loaded';
+}
+
+function clearAllReports() {
+  Object.keys(loadedReports).forEach(k => delete loadedReports[k]);
+  document.getElementById('monthly-reports-container').innerHTML =
+    '<p class="no-results">Select a month/year and click + Add Report to load a report.</p>';
+  document.getElementById('report-pills').innerHTML = '';
+  updateGrandTotal();
+}
+
+async function addMonthlyReport() {
+  const month = document.getElementById('rev-month').value;
+  const year  = document.getElementById('rev-year').value;
+  const key   = `${month||'all'}-${year||'all'}`;
+  const label = (month && year) ? `${MONTHS[parseInt(month)]} ${year}` : year ? `All of ${year}` : 'All Time';
+
+  // Don't load same period twice — just scroll to it
+  if (loadedReports[key]) {
+    const existing = document.getElementById('rpt-' + key);
+    if (existing) existing.scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  loadedReports[key] = { billed:0, collected:0, count:0 };
+
+  // Add pill tag
+  const pillsEl = document.getElementById('report-pills');
+  const pill = document.createElement('span');
+  pill.id = 'pill-' + key;
+  pill.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:#3a7d20;color:#fff;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;';
+  pill.innerHTML = `${label} <button onclick="removeReport('${key}')" style="background:none;border:none;color:#fff;cursor:pointer;font-size:16px;line-height:1;padding:0;">×</button>`;
+  pillsEl.appendChild(pill);
+
+  // Clear placeholder text on first load
+  const container = document.getElementById('monthly-reports-container');
+  if (container.querySelector('.no-results')) container.innerHTML = '';
+
+  // Add loading panel
+  const wrapper = document.createElement('div');
+  wrapper.id = 'rpt-' + key;
+  wrapper.style.cssText = 'margin-bottom:20px;border:1.5px solid #b8df9f;border-radius:12px;overflow:hidden;';
+  wrapper.innerHTML = `
+    <div style="background:#f0f9ea;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+      <strong style="color:#3a7d20;font-size:15px;">📅 ${label}</strong>
+      <button onclick="removeReport('${key}')" style="background:none;border:1.5px solid #ccc;border-radius:20px;padding:4px 12px;cursor:pointer;font-size:12px;color:#888;">Remove</button>
+    </div>
+    <div style="padding:14px;" id="rpt-body-${key}"><p class="loading">⏳ Loading invoices...</p></div>`;
+  container.appendChild(wrapper);
+  wrapper.scrollIntoView({behavior:'smooth', block:'start'});
+
+  // Fetch all invoices for this period
+  let url = '/api/monthly-revenue?';
+  if (month) url += `month=${month}&`;
+  if (year)  url += `year=${year}`;
+  const data = await fetch(url).then(r=>r.json()).catch(()=>[]);
+  const body = document.getElementById('rpt-body-' + key);
+
+  if (!data.length) {
+    body.innerHTML = '<p class="no-results">No invoices found for this period.</p>';
+    return;
+  }
+
+  // Calculate totals for this period
+  const totalBilled    = data.reduce((s,r)=>s+parseFloat(r.Total_Amount||0),0);
+  const totalCollected = data.reduce((s,r)=>s+parseFloat(r.Amount_Paid||0),0);
+  const totalOutst     = totalBilled - totalCollected;
+
+  // Store in loadedReports for grand total
+  loadedReports[key] = { billed:totalBilled, collected:totalCollected, count:data.length };
+  updateGrandTotal();
+
+  // Period summary chips
+  let html = `<div class="summary-strip" style="margin-bottom:14px;">
+    <div class="summary-chip"><div class="chip-label">Invoices</div><div class="chip-value">${data.length}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Billed</div><div class="chip-value">$${fmt(totalBilled)}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Collected</div><div class="chip-value">$${fmt(totalCollected)}</div></div>
+    <div class="summary-chip"><div class="chip-label">Outstanding</div><div class="chip-value" style="color:${totalOutst>0?'#c0392b':'#3a7d20'};">$${fmt(totalOutst)}</div></div>
+  </div>`;
+
+  // Full invoice table — every row for this period
+  html += `<div class="results-wrap"><table class="results-table">
+    <thead><tr>
+      <th>Invoice ID</th><th>Client</th><th>Invoice Date</th><th>Due Date</th>
+      <th>Total Billed</th><th>Amount Paid</th><th>Balance Due</th><th>Status</th>
+    </tr></thead><tbody>`;
+
+  data.forEach(r => {
+    const sc      = r.Invoice_Status==='Paid'?'badge-paid':r.Invoice_Status==='Unpaid'?'badge-unpaid':'badge-partial';
+    const balance = parseFloat(r.Balance_Due||0);
+    html += `<tr>
+      <td>${r.Invoice_ID}</td>
+      <td><strong>${r.Client_Name}</strong></td>
+      <td>${r.Invoice_Date}</td>
+      <td>${r.Due_Date}</td>
+      <td class="money">$${fmt(r.Total_Amount)}</td>
+      <td class="money">$${fmt(r.Amount_Paid)}</td>
+      <td class="${balance>0?'money-red':'money'}">$${fmt(balance)}</td>
+      <td><span class="badge ${sc}">${r.Invoice_Status}</span></td>
+    </tr>`;
+  });
+
+  // Totals row for this period
+  html += `<tr class="totals-row">
+    <td colspan="4"><strong>PERIOD TOTAL — ${label}</strong></td>
+    <td class="money">$${fmt(totalBilled)}</td>
+    <td class="money">$${fmt(totalCollected)}</td>
+    <td class="${totalOutst>0?'money-red':'money'}">$${fmt(totalOutst)}</td>
+    <td>—</td>
+  </tr></tbody></table></div>`;
+
+  body.innerHTML = html;
+}
+
+function removeReport(key) {
+  delete loadedReports[key];
+  const el   = document.getElementById('rpt-' + key);
+  const pill = document.getElementById('pill-' + key);
+  if (el)   el.remove();
+  if (pill) pill.remove();
+  const container = document.getElementById('monthly-reports-container');
+  if (!container.children.length) {
+    container.innerHTML = '<p class="no-results">Select a month/year and click + Add Report to load a report.</p>';
+  }
+  updateGrandTotal();
+}
+
+// ── Outstanding Invoices ─────────────────────────────────────
+async function loadOutstanding(btn) {
+  btn.disabled = true; btn.textContent = '⏳ Loading...';
+  const el  = document.getElementById('outstanding-results');
+  const sum = document.getElementById('outstanding-summary');
+  const data = await fetch('/api/outstanding-invoices').then(r=>r.json()).catch(()=>[]);
+  btn.disabled = false; btn.textContent = 'Load Outstanding Invoices';
+  if (!data.length) { el.innerHTML='<p class="no-results">No outstanding invoices found.</p>'; return; }
+
+  const totalDue       = data.reduce((s,r)=>s+parseFloat(r.Balance_Due||0),0);
+  const totalBilled    = data.reduce((s,r)=>s+parseFloat(r.Total_Amount||0),0);
+  const totalCollected = data.reduce((s,r)=>s+parseFloat(r.Amount_Paid||0),0);
+
+  sum.innerHTML = `<div class="summary-strip">
+    <div class="summary-chip"><div class="chip-label">Open Invoices</div><div class="chip-value">${data.length}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Billed</div><div class="chip-value">$${fmt(totalBilled)}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Paid</div><div class="chip-value">$${fmt(totalCollected)}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Outstanding</div><div class="chip-value" style="color:#c0392b;">$${fmt(totalDue)}</div></div>
+  </div>`;
+
+  let html = `<div class="results-wrap"><table class="results-table"><thead><tr>
+    <th>Invoice ID</th><th>Client</th><th>Invoice Date</th><th>Due Date</th>
+    <th>Total Billed</th><th>Amount Paid</th><th>Balance Due</th><th>Status</th><th>Days Overdue</th><th>Aging</th>
+  </tr></thead><tbody>`;
+
+  data.forEach(r => {
+    const sc = r.Invoice_Status==='Unpaid'?'badge-unpaid':'badge-partial';
+    const ac = r.Aging_Bucket==='Current'?'aging-current':r.Aging_Bucket==='1-30 Days'?'aging-30':r.Aging_Bucket==='31-60 Days'?'aging-60':'aging-old';
+    html += `<tr>
+      <td>${r.Invoice_ID}</td><td><strong>${r.Client_Name}</strong></td>
+      <td>${r.Invoice_Date}</td><td>${r.Due_Date}</td>
+      <td class="money">$${fmt(r.Total_Amount)}</td>
+      <td class="money">$${fmt(r.Amount_Paid)}</td>
+      <td class="money-red">$${fmt(r.Balance_Due)}</td>
+      <td><span class="badge ${sc}">${r.Invoice_Status}</span></td>
+      <td>${Math.max(0, r.Days_Overdue||0)} days</td>
+      <td><span class="${ac}">${r.Aging_Bucket}</span></td>
+    </tr>`;
+  });
+
+  html += `<tr class="totals-row">
+    <td colspan="4"><strong>TOTAL</strong></td>
+    <td class="money">$${fmt(totalBilled)}</td>
+    <td class="money">$${fmt(totalCollected)}</td>
+    <td class="money-red">$${fmt(totalDue)}</td>
+    <td colspan="3">—</td>
+  </tr></tbody></table></div>`;
+  el.innerHTML = html;
+}
+
+// ── Job Costing ──────────────────────────────────────────────
+async function loadJobCosting(btn) {
+  btn.disabled = true; btn.textContent = '⏳ Loading...';
+  const el  = document.getElementById('costing-results');
+  const sum = document.getElementById('costing-summary');
+  const estFilter = document.getElementById('jc-estimate-filter').value.trim();
+  const url = '/api/job-costing' + (estFilter ? `?estimate_id=${estFilter}` : '');
+  const data = await fetch(url).then(r=>r.json()).catch(()=>[]);
+  btn.disabled = false; btn.textContent = 'Load Job Costing';
+  if (!data.length) { el.innerHTML='<p class="no-results">No job costing records found.</p>'; return; }
+
+  const gEst = data.reduce((s,r)=>s+parseFloat(r.Total_Estimated_Cost||0),0);
+  const gAct = data.reduce((s,r)=>s+parseFloat(r.Total_Actual_Cost||0),0);
+  const gVar = gAct - gEst;
+
+  sum.innerHTML = `<div class="summary-strip">
+    <div class="summary-chip"><div class="chip-label">Jobs Tracked</div><div class="chip-value">${data.length}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Estimated</div><div class="chip-value">$${fmt(gEst)}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Actual</div><div class="chip-value">$${fmt(gAct)}</div></div>
+    <div class="summary-chip"><div class="chip-label">Total Variance</div><div class="chip-value" style="color:${gVar>0?'#c0392b':'#2e6318'};">${gVar>0?'+':''}$${fmt(Math.abs(gVar))}</div></div>
+  </div>`;
+
+  let html = `<div class="results-wrap"><table class="results-table"><thead><tr>
+    <th>Est. ID</th><th>Client</th><th>Service</th><th>Date</th>
+    <th>Estimated</th><th>Actual</th><th>Labor Hrs</th><th>Labor Cost</th><th>Materials</th>
+    <th>Variance</th><th>Status</th>
+  </tr></thead><tbody>`;
+
+  data.forEach(r => {
+    const v  = parseFloat(r.Variance||0);
+    const vc = v>0?'over-budget':v<0?'under-budget':'on-budget';
+    const vl = v>0?'Over Budget':v<0?'Under Budget':'On Budget';
+    html += `<tr>
+      <td>${r.Estimate_ID ? 'EST-'+r.Estimate_ID : '—'}</td><td><strong>${r.Client_Name}</strong></td><td>${r.Service_Type}</td><td>${r.Service_Date}</td>
+      <td class="money">$${fmt(r.Total_Estimated_Cost)}</td>
+      <td class="money">$${fmt(r.Total_Actual_Cost)}</td>
+      <td>${r.Actual_Labor_Hours}h</td>
+      <td class="money">$${fmt(r.Actual_Labor_Cost)}</td>
+      <td class="money">$${fmt(r.Actual_Materials)}</td>
+      <td class="${vc}">${v>=0?'+':''}$${fmt(v)}</td>
+      <td class="${vc}">${vl}</td>
+    </tr>`;
+  });
+
+  html += `<tr class="totals-row">
+    <td colspan="4"><strong>GRAND TOTAL</strong></td>
+    <td class="money">$${fmt(gEst)}</td>
+    <td class="money">$${fmt(gAct)}</td>
+    <td colspan="3">—</td>
+    <td class="${gVar>0?'over-budget':'under-budget'}">${gVar>=0?'+':''}$${fmt(gVar)}</td>
+    <td>—</td>
+  </tr></tbody></table></div>`;
+
+  el.innerHTML = html;
+}
+</script>
+</body>
+</html>

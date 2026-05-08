@@ -1,0 +1,170 @@
+/* =====================
+   WELCOME PAGE LAYOUT
+   ===================== */
+
+body.welcome-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome-header {
+  background: var(--db-green-light);
+  padding: 20px;
+  text-align: center;
+  border-bottom: 3px solid var(--db-green-mid);
+}
+
+.welcome-header .title {
+  font-family: 'Playfair Display', serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--db-green-dark);
+  letter-spacing: 0.5px;
+}
+
+.welcome-header .subtitle {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #4a6e30;
+  font-weight: 600;
+}
+
+/* =====================
+   HERO SECTION
+   ===================== */
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 14px;
+}
+
+.hero-label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: #6a9050;
+  animation: fadeUp 0.5s ease both;
+  animation-delay: 0.05s;
+}
+
+.hero-heading {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 46px);
+  color: var(--db-text);
+  text-align: center;
+  line-height: 1.2;
+  max-width: 520px;
+  animation: fadeUp 0.5s ease both;
+  animation-delay: 0.15s;
+}
+
+.hero-desc {
+  font-size: 16px;
+  color: #555;
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.6;
+  animation: fadeUp 0.5s ease both;
+  animation-delay: 0.25s;
+}
+
+/* =====================
+   PORTAL CARDS
+   ===================== */
+
+.portal-row {
+  display: flex;
+  gap: 28px;
+  margin-top: 44px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.portal-card {
+  background: var(--white);
+  border-radius: 22px;
+  width: 270px;
+  padding: 36px 28px 30px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--db-text);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+  border: 2px solid transparent;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+  display: block;
+}
+
+.portal-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 32px rgba(58,125,32,0.18);
+  border-color: var(--db-green-mid);
+}
+
+.portal-card:active { transform: translateY(-2px); }
+
+.portal-card:nth-child(1) { animation: fadeUp 0.5s ease both; animation-delay: 0.35s; }
+.portal-card:nth-child(2) { animation: fadeUp 0.5s ease both; animation-delay: 0.45s; }
+
+.portal-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 30px;
+}
+
+.icon-manager  { background: #d4f0bb; }
+.icon-customer { background: #e0f4d6; }
+
+.portal-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  margin-bottom: 10px;
+  color: var(--db-green-dark);
+}
+
+.portal-card p {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.55;
+  margin-bottom: 24px;
+}
+
+.portal-btn {
+  display: inline-block;
+  padding: 11px 30px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  text-decoration: none;
+}
+
+.btn-manager  { background: var(--db-green-dark); color: white; }
+.btn-manager:hover  { background: #2e6318; }
+.btn-customer { background: var(--db-green-mid); color: white; }
+.btn-customer:hover { background: #5ea040; }
+
+/* =====================
+   WELCOME FOOTER
+   ===================== */
+
+.welcome-footer {
+  text-align: center;
+  padding: 18px;
+  font-size: 12px;
+  color: #999;
+  border-top: 1px solid #ddd;
+}

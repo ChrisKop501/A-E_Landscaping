@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Landscape Database System – Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/base.css"/>
+  <link rel="stylesheet" href="/css/nav.css"/>
+  <link rel="stylesheet" href="/css/dashboard.css"/>
+  <style>
+    .top-area-inner { display:flex; align-items:center; justify-content:space-between; padding:0 8px; }
+    .stat-value { font-family:'Playfair Display',serif; font-size:28px; font-weight:700; color:var(--db-green-dark); }
+    .quick-links { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; margin-bottom:24px; }
+    .quick-link {
+      background:#fff; border:2px solid #b8df9f; border-radius:12px; padding:16px 18px;
+      text-decoration:none; color:#3a7d20; font-weight:700; font-size:14px;
+      transition:all .15s; display:flex; align-items:center; gap:10px;
+    }
+    .quick-link:hover { background:#3a7d20; color:#fff; border-color:#3a7d20; }
+    .quick-link .ql-icon { font-size:20px; }
+  </style>
+</head>
+<body>
+  <div class="top-area">
+    <div class="top-area-inner">
+      <div class="title">🌿 Landscape Database System</div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <span style="font-size:13px;color:#4a6e30;font-weight:600;background:rgba(255,255,255,0.5);padding:4px 12px;border-radius:20px;">👤 {{ username }}</span>
+        <a href="/logout" style="font-size:12px;color:#3a7d20;font-weight:700;text-decoration:none;background:#fff;border:1.5px solid #b8df9f;padding:5px 12px;border-radius:20px;">Log Out</a>
+      </div>
+    </div>
+    <nav class="nav-row" style="margin-top:12px;">
+      <a href="/dashboard"          class="nav-btn active">Dashboard</a>
+      <a href="/manager/clients"    class="nav-btn">Clients</a>
+      <a href="/manager/estimates"  class="nav-btn">Estimates</a>
+      <a href="/manager/contracts"  class="nav-btn">Contracts</a>
+      <a href="/manager/billing"    class="nav-btn">Billing</a>
+      <a href="/manager/reports"    class="nav-btn">Reports</a>
+      <a href="/manager/employees"  class="nav-btn">Employees</a>
+      <a href="/manager/jobcosting" class="nav-btn">Job Costing</a>
+      <a href="/manager/home"       class="nav-btn">Top Clients</a>
+    </nav>
+  </div>
+
+  <div class="main">
+    <div class="page-title">Manager Dashboard</div>
+
+    <!-- LIVE STATS FROM DB -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Total Clients</div>
+        <div class="stat-value">{{ stats.clients }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Contracts</div>
+        <div class="stat-value">{{ stats.contracts }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Open Invoices</div>
+        <div class="stat-value">{{ stats.open_inv }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Total Invoiced</div>
+        <div class="stat-value">${{ "{:,.0f}".format(stats.total_inv or 0) }}</div>
+      </div>
+    </div>
+
+    <!-- QUICK NAV -->
+    <div class="page-title" style="margin-top:10px;">Quick Access</div>
+    <div class="quick-links">
+      <a href="/manager/clients"   class="quick-link"><span class="ql-icon">👥</span> Clients &amp; Feedback</a>
+      <a href="/manager/employees" class="quick-link"><span class="ql-icon">👷</span> Employees &amp; Schedule</a>
+      <a href="/manager/billing"   class="quick-link"><span class="ql-icon">💳</span> Billing &amp; Payments</a>
+      <a href="/manager/reports"   class="quick-link"><span class="ql-icon">📊</span> Revenue Reports</a>
+      <a href="/manager/contracts" class="quick-link"><span class="ql-icon">📄</span> New Contract</a>
+      <a href="/manager/home"      class="quick-link"><span class="ql-icon">🔍</span> Ad-Hoc Queries</a>
+    </div>
+
+    <!-- REVENUE CHART -->
+    <div class="dash-grid">
+      <div>
+
+          <!-- Bars loaded from API -->
+        </div>
+        <div class="action-box">
+          <h3>Reports &amp; Analytics</h3>
+          <div class="action-buttons">
+            <button class="pill-btn" onclick="location.href='/manager/reports'">Monthly Revenue</button>
+            <button class="pill-btn" onclick="location.href='/manager/home'">Ad-Hoc Queries</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="section-title">Recent Outstanding Invoices</div>
+        <div id="recent-invoices" style="min-height:160px;">
+          <p style="color:#999;font-size:13px;">Loading...</p>
+        </div>
+        <div class="action-box">
+          <h3>Billing Actions</h3>
+          <div class="action-buttons">
+            <button class="pill-btn" onclick="location.href='/manager/billing'">Record Payment</button>
+            <button class="pill-btn" onclick="location.href='/manager/reports'">View Reports</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">© 2026 A &amp; E Landscaping and Hauling – Landscape Database System</footer>
+
+<script>
+function fmt(n) { return parseFloat(n||0).toLocaleString('en-US',{minimumFractionDigits:2}); }
+
+// ── Revenue bar chart (from monthly revenue API) ────────────
+async function loadChart() {
+  const data = await fetch('/api/monthly-revenue').then(r=>r.json()).catch(()=>[]);
+  const chart = document.getElementById('chart-area');
+  if (!data.length) { chart.innerHTML='<p style="color:#999;font-size:12px;align-self:center;">No data available.</p>'; return; }
+
+  const max = Math.max(...data.map(e => parseFloat(e.Total_Billed||0)), 1);
+  const MONTH_NAMES=['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  chart.innerHTML = data.map(e => {
+    const total = parseFloat(e.Total_Billed || 0);
+    const h = Math.max(Math.round((total / max) * 140), 4);
+    return `<div class="chart-bar-wrap">
+      <div class="chart-bar" style="height:${h}px;" title="${MONTH_NAMES[e.Month]}: $${fmt(total)} (${e.Invoice_Count} invoice${e.Invoice_Count!=1?'s':''})"></div>
+      <span>${MONTH_NAMES[e.Month]}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Recent outstanding invoices ─────────────────────────────
+async function loadRecentInvoices() {
+  const data = await fetch('/api/outstanding-invoices').then(r=>r.json()).catch(()=>[]);
+  const el = document.getElementById('recent-invoices');
+  if (!data.length) { el.innerHTML='<p style="color:#2e6318;font-size:13px;">✅ No outstanding invoices!</p>'; return; }
+
+  const top5 = data.slice(0,5);
+  let html = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+    <thead><tr style="background:#b8df9f;">
+      <th style="padding:8px;text-align:left;font-size:11px;color:#3a7d20;text-transform:uppercase;">Client</th>
+      <th style="padding:8px;text-align:left;font-size:11px;color:#3a7d20;text-transform:uppercase;">Balance</th>
+      <th style="padding:8px;text-align:left;font-size:11px;color:#3a7d20;text-transform:uppercase;">Aging</th>
+    </tr></thead><tbody>`;
+  top5.forEach(r => {
+    html += `<tr><td style="padding:8px;border-bottom:1px solid #f0f0f0;"><strong>${r.Client_Name}</strong></td>
+      <td style="padding:8px;border-bottom:1px solid #f0f0f0;font-weight:700;color:#c0392b;">$${fmt(r.Balance_Due)}</td>
+      <td style="padding:8px;border-bottom:1px solid #f0f0f0;font-size:11px;color:#888;">${r.Aging_Bucket}</td>
+    </tr>`;
+  });
+  if (data.length > 5) html += `<tr><td colspan="3" style="padding:8px;text-align:center;font-size:12px;color:#999;">+${data.length-5} more — <a href="/manager/billing" style="color:#3a7d20;">View all</a></td></tr>`;
+  html += '</tbody></table>';
+  el.innerHTML = html;
+}
+
+loadChart();
+loadRecentInvoices();
+</script>
+</body>
+</html>

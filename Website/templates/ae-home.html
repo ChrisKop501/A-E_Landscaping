@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>A &amp; E Landscaping and Hauling – Redding, CA</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --green:#2d5a27;--green-mid:#4a7c42;--green-light:#7abb57;
+      --green-pale:#e8f5e2;--tan:#f7f3ed;--border:#ddd;
+      --dark:#1a1a1a;--mid:#555;--white:#fff;
+    }
+    body{font-family:'Source Sans 3',sans-serif;color:var(--dark);background:#fff}
+
+    /* TOPBAR */
+    .topbar{background:#1c3a18;padding:8px 2rem;text-align:center;font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.06em;text-transform:uppercase}
+    .topbar a{color:rgba(255,255,255,.85);text-decoration:none;margin:0 10px}
+    .topbar a:hover{color:#fff}
+
+    /* NAV */
+    .nav{background:var(--green);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;min-height:64px;gap:1rem;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+    .nav-logo{color:#fff;font-family:'Playfair Display',serif;font-size:19px;font-weight:700;text-decoration:none;line-height:1.2}
+    .nav-logo span{display:block;font-size:11px;font-weight:300;opacity:.75;letter-spacing:.04em}
+    .nav-links{display:flex;gap:1.6rem;list-style:none}
+    .nav-links a{color:rgba(255,255,255,.85);text-decoration:none;font-size:14px;font-weight:600;transition:color .15s}
+    .nav-links a:hover,.nav-links a.active{color:#fff}
+    .nav-links a.active{border-bottom:2px solid rgba(255,255,255,.5);padding-bottom:2px}
+    .nav-contact{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+    .nav-contact a{color:rgba(255,255,255,.85);font-size:13px;text-decoration:none}
+    .nav-contact a:hover{color:#fff}
+    .btn-login{display:inline-block;margin-top:4px;padding:5px 14px;background:rgba(255,255,255,.15);color:#fff!important;border:1px solid rgba(255,255,255,.35);border-radius:20px;font-size:12px;font-weight:700;text-decoration:none}
+    .btn-login:hover{background:rgba(255,255,255,.25)!important}
+
+    /* TABS */
+    .tabs{background:#fff;border-bottom:3px solid var(--green)}
+    .tab-list{display:flex;padding:0 2rem}
+    .tab-btn{padding:14px 22px;background:none;border:none;cursor:pointer;font-family:'Source Sans 3',sans-serif;font-size:14px;font-weight:600;color:#777;border-bottom:3px solid transparent;margin-bottom:-3px;transition:color .15s,border-color .15s}
+    .tab-btn.active{color:var(--green);border-bottom-color:var(--green)}
+    .tab-btn:hover{color:var(--green)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* HERO */
+    .hero{position:relative;min-height:560px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden}
+    .hero-content{background:linear-gradient(135deg,var(--green) 0%,var(--green-mid) 100%);padding:4rem 3rem;display:flex;flex-direction:column;justify-content:center;position:relative;z-index:2}
+    .hero-eyebrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--green-light);margin-bottom:14px}
+    .hero h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:#fff;line-height:1.15;margin-bottom:1.2rem}
+    .hero-sub{font-size:15px;color:rgba(255,255,255,.85);line-height:1.75;margin-bottom:2rem;max-width:420px}
+    .hero-btns{display:flex;gap:.8rem;flex-wrap:wrap}
+    .btn-solid{padding:12px 26px;background:#fff;color:var(--green);border-radius:4px;font-size:14px;font-weight:700;text-decoration:none}
+    .btn-solid:hover{background:#f0f0f0}
+    .btn-ghost{padding:12px 26px;border:1.5px solid rgba(255,255,255,.5);color:#fff;border-radius:4px;font-size:14px;text-decoration:none}
+    .btn-ghost:hover{background:rgba(255,255,255,.1)}
+    .hero-image{position:relative;overflow:hidden}
+    .hero-image img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;filter:brightness(.85)}
+    .hero-badge{position:absolute;bottom:24px;right:24px;background:rgba(255,255,255,.93);border-radius:12px;padding:16px 20px;border-left:4px solid var(--green)}
+    .hero-badge h4{font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+    .hero-badge ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+    .hero-badge li{font-size:13px;color:var(--dark);display:flex;align-items:center;gap:7px}
+    .hero-badge li::before{content:'✓';color:var(--green);font-weight:700;font-size:12px}
+
+    /* ESTIMATE CTA STRIP (replaces services strip) */
+    .estimate-cta-strip{
+      background:var(--green);
+      padding:3rem 2rem;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:1rem;
+    }
+    .estimate-cta-strip h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:#fff}
+    .estimate-cta-strip p{font-size:15px;color:rgba(255,255,255,.82);max-width:500px;line-height:1.7}
+    .btn-estimate-cta{
+      display:inline-block;
+      background:#fff;
+      color:var(--green);
+      padding:14px 36px;
+      border-radius:4px;
+      font-size:16px;
+      font-weight:700;
+      text-decoration:none;
+      margin-top:.5rem;
+      transition:background .15s,transform .15s;
+      border:none;
+      cursor:pointer;
+      font-family:'Source Sans 3',sans-serif;
+    }
+    .btn-estimate-cta:hover{background:#f0f0f0;transform:translateY(-2px)}
+
+    /* WHY (photo split) */
+    .photo-split{display:grid;grid-template-columns:1fr 1fr;min-height:420px}
+    .photo-split-text{background:var(--tan);padding:3.5rem 3rem;display:flex;flex-direction:column;justify-content:center}
+    .photo-split-text h2{font-family:'Playfair Display',serif;font-size:1.9rem;color:var(--green);margin-bottom:1rem;line-height:1.2}
+    .photo-split-text p{font-size:14px;color:var(--mid);line-height:1.8;margin-bottom:1.5rem}
+    .traits{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1.8rem}
+    .trait{background:#fff;border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:13px;font-weight:600;color:var(--green);display:flex;align-items:center;gap:8px}
+    .trait::before{content:'✓';color:var(--green-light);font-weight:700}
+    .photo-split-img{position:relative;overflow:hidden}
+    .photo-split-img img{width:100%;height:100%;object-fit:cover;display:block}
+
+    /* SERVICE DETAIL CARDS */
+    .service-details{background:#fff;padding:3.5rem 2rem}
+    .service-details h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--green);text-align:center;margin-bottom:2rem}
+    .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;max-width:960px;margin:0 auto}
+    .detail-card{border:1px solid var(--border);border-radius:10px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+    .detail-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(45,90,39,.15)}
+    .detail-card img{width:100%;height:130px;object-fit:cover;display:block}
+    .detail-card-body{padding:14px}
+    .detail-card-body h4{font-size:13px;font-weight:700;color:var(--green);margin-bottom:6px}
+    .detail-card-body p{font-size:12px;color:var(--mid);line-height:1.6}
+
+    /* PORTAL */
+    .portal-section{background:var(--green);padding:3.5rem 2rem}
+    .portal-intro{text-align:center;margin-bottom:2rem}
+    .portal-intro h2{font-family:'Playfair Display',serif;font-size:1.6rem;color:#fff;margin-bottom:.8rem}
+    .portal-intro p{font-size:14px;color:rgba(255,255,255,.8);line-height:1.75;max-width:580px;margin:0 auto}
+    .portal-features{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:2rem;max-width:960px;margin-left:auto;margin-right:auto}
+    .portal-feature{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:1.4rem 1.2rem;text-align:center}
+    .portal-feature-icon{font-size:26px;margin-bottom:.6rem}
+    .portal-feature h4{font-size:13px;font-weight:700;color:#fff;margin-bottom:.5rem}
+    .portal-feature p{font-size:12px;color:rgba(255,255,255,.72);line-height:1.6}
+    .portal-cta{text-align:center;border-top:1px solid rgba(255,255,255,.15);padding-top:1.5rem;max-width:960px;margin:0 auto}
+    .portal-cta p{color:rgba(255,255,255,.75);font-size:13px;margin-bottom:1rem}
+    .portal-btns{display:flex;gap:.8rem;justify-content:center}
+    .btn-portal{display:inline-block;background:#fff;color:var(--green);padding:10px 24px;border-radius:4px;text-decoration:none;font-size:13px;font-weight:700}
+    .btn-portal:hover{background:#f0f0f0}
+    .btn-portal-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+    .btn-portal-outline:hover{background:rgba(255,255,255,.1);color:#fff}
+
+    /* GALLERY CTA */
+    .gallery-cta-banner{position:relative;overflow:hidden;height:210px}
+    .gallery-cta-banner img{width:100%;height:100%;object-fit:cover;display:block;filter:brightness(.5)}
+    .gallery-cta-overlay{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+    .gallery-cta-overlay h3{font-family:'Playfair Display',serif;font-size:1.6rem;color:#fff}
+    .gallery-cta-overlay a{display:inline-block;background:#fff;color:var(--green);padding:11px 28px;border-radius:4px;text-decoration:none;font-size:14px;font-weight:700}
+    .gallery-cta-overlay a:hover{background:#f0f0f0}
+
+    /* Q&A */
+    .qa{background:var(--tan);padding:3rem 2rem}
+    .qa h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--green);text-align:center;margin-bottom:1.5rem}
+    .qa-inner{max-width:720px;margin:0 auto}
+    .qa-item{background:#fff;border:1px solid var(--border);border-radius:8px;padding:1.3rem 1.6rem;margin-bottom:1rem}
+    .qa-item h4{font-size:14px;font-weight:700;color:var(--dark);margin-bottom:.5rem}
+    .qa-item p{font-size:13px;color:var(--mid);line-height:1.75}
+
+    /* FOOTER */
+    .footer-wrap{background:var(--green)}
+    .footer{padding:2.5rem 2rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:2rem;max-width:960px;margin:0 auto}
+    .footer h4{font-family:'Playfair Display',serif;color:#fff;font-size:1rem;margin-bottom:1rem;line-height:1.4}
+    .footer ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+    .footer li,.footer a{font-size:13px;color:rgba(255,255,255,.7);text-decoration:none}
+    .footer a:hover{color:#fff}
+    .social-links{display:flex;gap:.8rem;margin-top:.8rem}
+    .social-links a{font-size:12px;color:rgba(255,255,255,.75);background:rgba(255,255,255,.1);padding:5px 12px;border-radius:4px;text-decoration:none}
+    .social-links a:hover{background:rgba(255,255,255,.18);color:#fff}
+    .footer-bottom{background:#1c3a18;padding:14px 2rem;text-align:center;font-size:12px;color:rgba(255,255,255,.4)}
+
+    /* FORMS */
+    .form-section{background:var(--tan);padding:3rem 2rem}
+    .form-section h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--green);margin-bottom:.5rem}
+    .form-section .subtitle{font-size:14px;color:#777;margin-bottom:1.8rem;line-height:1.6}
+    .form-card{background:#fff;border-radius:12px;border:1px solid var(--border);padding:26px;max-width:680px}
+    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .f-row.single{grid-template-columns:1fr}
+    .f-group{display:flex;flex-direction:column;gap:4px}
+    .f-group label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#6a9050}
+    .f-group input,.f-group select,.f-group textarea{padding:10px 12px;border-radius:8px;border:1.5px solid #ccc;font-size:14px;font-family:inherit;outline:none;background:#fafafa}
+    .f-group input:focus,.f-group select:focus,.f-group textarea:focus{border-color:var(--green);background:#fff}
+    .f-group textarea{resize:vertical;min-height:80px}
+    .f-actions{display:flex;gap:10px;margin-top:14px}
+    .btn-submit{padding:11px 24px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer}
+    .btn-submit:hover{background:var(--green-mid)}
+    .btn-clear{padding:11px 20px;background:#eee;color:#555;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}
+    .rating-select{padding:10px 12px;border-radius:8px;border:1.5px solid #ccc;font-size:14px;font-family:inherit;outline:none;background:#fafafa;width:100%}
+
+    .toast{position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:14px 22px;border-radius:10px;font-size:14px;font-weight:700;box-shadow:0 4px 18px rgba(0,0,0,.18);z-index:999;display:none;max-width:340px}
+    .toast.error{background:#c0392b}
+
+    @media(max-width:720px){
+      .hero{grid-template-columns:1fr}
+      .hero-image{height:240px}
+      .hero h1{font-size:2rem}
+      .photo-split{grid-template-columns:1fr}
+      .photo-split-img{height:260px}
+      .footer{grid-template-columns:1fr}
+      .nav-links{display:none}
+      .f-row{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    📞 <a href="tel:15307109500">1 (530) 710-9500</a>
+    &nbsp;|&nbsp; Call or Text for a FREE Estimate &nbsp;|&nbsp; Serving Redding, CA &amp; Surrounding Areas
+    &nbsp;|&nbsp; <a href="mailto:contact@aelandscape.net">contact@aelandscape.net</a>
+  </div>
+
+  <nav class="nav">
+    <a class="nav-logo" href="/">
+      A &amp; E Landscaping and Hauling
+      <span>Redding, CA &amp; Surrounding Areas</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="/" class="active">Home</a></li>
+      <li><a href="/gallery">Gallery</a></li>
+      <li><a href="/employee-portal">Employee Portal</a></li>
+    </ul>
+    <div class="nav-contact">
+      <a href="tel:15307109500">1 (530) 710-9500</a>
+      <a href="mailto:contact@aelandscape.net">contact@aelandscape.net</a>
+      <a href="/login" class="btn-login">Manager Login</a>
+    </div>
+  </nav>
+
+  <div class="tabs">
+    <div class="tab-list">
+      <button class="tab-btn active" onclick="showTab('home-tab',this)">Home</button>
+      <button class="tab-btn" onclick="showTab('feedback-tab',this)">Leave Feedback</button>
+      <button class="tab-btn" onclick="showTab('estimate-tab',this)">Request an Estimate</button>
+      <button class="tab-btn" onclick="showTab('referral-tab',this)">Refer a Friend</button>
+    </div>
+  </div>
+
+  <!-- ══ TAB 1: HOME ══ -->
+  <div id="home-tab" class="tab-panel active">
+
+    <!-- HERO — lush green mowed lawn -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-eyebrow">Redding, CA &amp; Surrounding Areas</div>
+        <h1>Let Us Beautify<br><em>Your</em> Yard</h1>
+        <p class="hero-sub">Weekly, bi-weekly, or monthly yard maintenance for homeowners, property managers, and commercial accounts throughout the Redding area.</p>
+        <div class="hero-btns">
+          <a href="tel:15307109500" class="btn-solid">📞 Call (530) 710-9500</a>
+          <button class="btn-ghost" onclick="showTab('estimate-tab',document.querySelectorAll('.tab-btn')[2])">Free Estimate →</button>
+        </div>
+      </div>
+      <div class="hero-image">
+        <!-- Freshly mowed, striped lawn -->
+        <img src="/css/images/yard-hero.jpg" alt="Beautiful landscaped front yard with flowers and lawn"/>
+        <div class="hero-badge">
+          <h4>Commercial &amp; Residential</h4>
+          <ul>
+            <li>Yard Maintenance</li>
+            <li>Fall &amp; Spring Clean Up</li>
+            <li>Sprinkler Repairs</li>
+            <li>Lot Clearing</li>
+            <li>Defensible Space</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ESTIMATE CTA STRIP (replacing services icon strip) -->
+    <section class="estimate-cta-strip">
+      <h2>Ready to Get Started?</h2>
+      <p>We offer free on-site estimates for all services — lawn maintenance, clean ups, sprinkler repairs, lot clearing, and more. Fill out the form and we'll be in touch.</p>
+      <button class="btn-estimate-cta" onclick="showTab('estimate-tab',document.querySelectorAll('.tab-btn')[2]);window.scrollTo({top:0,behavior:'smooth'})">
+        📋 Request a Free Estimate Today!
+      </button>
+    </section>
+
+    <!-- WHY CHOOSE US — crew working on a yard -->
+    <section class="photo-split">
+      <div class="photo-split-text">
+        <h2>Why Choose A &amp; E?</h2>
+        <p>We work the entire yard throughout the seasons. Each visit starts at the front walk — everything trimmed, clean, and looking its best. We mow, edge, blow down, and test sprinklers every visit. Up to 2 man-hours on site. All debris goes in your cans.</p>
+        <button class="btn-solid" style="background:var(--green);color:#fff;border:none;cursor:pointer;align-self:flex-start;font-family:'Source Sans 3',sans-serif;" onclick="showTab('estimate-tab',document.querySelectorAll('.tab-btn')[2]);window.scrollTo({top:0,behavior:'smooth'})">Get a Free Estimate</button>
+      </div>
+      <div class="photo-split-img">
+        <img src="/css/images/crew-work.jpg" alt="A &amp; E Landscaping crew mowing and trimming"/>
+      </div>
+    </section>
+
+
+    <!-- CLIENT PORTAL -->
+    <section class="portal-section">
+      <div class="portal-intro">
+        <h2>Your Client &amp; Service Portal</h2>
+        <p>A &amp; E uses an online system to keep you informed about your services, invoices, and contracts — all in one place.</p>
+      </div>
+      <div class="portal-features">
+        <div class="portal-feature"><div class="portal-feature-icon">📋</div><h4>Service Tracking</h4><p>See what's scheduled and when it was last performed.</p></div>
+        <div class="portal-feature"><div class="portal-feature-icon">💳</div><h4>Billing &amp; Invoices</h4><p>View invoices, payment history, and outstanding balances.</p></div>
+        <div class="portal-feature"><div class="portal-feature-icon">📝</div><h4>Estimates &amp; Contracts</h4><p>Review your estimates and active contracts at any time.</p></div>
+        <div class="portal-feature"><div class="portal-feature-icon">⭐</div><h4>Leave Feedback</h4><p>Rate your visits using the Feedback tab above.</p></div>
+      </div>
+      <div class="portal-cta">
+        <p>Questions about your account? Contact us anytime.</p>
+        <div class="portal-btns">
+          <a href="tel:15307109500" class="btn-portal">📞 Call Us</a>
+          <a href="mailto:contact@aelandscape.net" class="btn-portal btn-portal-outline">✉️ Email Us</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY CTA — manicured backyard -->
+    <div class="gallery-cta-banner">
+      <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80&fit=crop&crop=center" alt="Beautiful backyard"/>
+      <div class="gallery-cta-overlay">
+        <h3>See Our Work</h3>
+        <a href="/gallery">View Our Work Gallery →</a>
+      </div>
+    </div>
+
+    <!-- Q&A -->
+    <section class="qa">
+      <h2>Questions &amp; Answers</h2>
+      <div class="qa-inner">
+        <div class="qa-item"><h4>How do we get started?</h4><p>Reach out for an estimate and we'll come take a look at your yard and give you a quote. You can also use the <strong>Request an Estimate</strong> tab at the top of this page to submit your info online.</p></div>
+        <div class="qa-item"><h4>Are you insured and licensed?</h4><p>We are fully insured with general liability and workers compensation insurance. We are licensed to do business in Redding and surrounding areas. We focus on jobs less than $500 and do not currently hold a contractors license.</p></div>
+        <div class="qa-item"><h4>What are your specialties?</h4><p>Smaller jobs and ongoing maintenance. We love partnering with property management companies and making rental properties look great. We also do excellent one-day clean-ups.</p></div>
+        <div class="qa-item"><h4>How do I leave feedback?</h4><p>Click the <strong>Leave Feedback</strong> tab at the top of this page, select your name and service visit, give us a rating, and submit — it goes directly into our system.</p></div>
+        <div class="qa-item"><h4>Do you work with property managers?</h4><p>Absolutely — it's one of our specialties. We coordinate directly with property managers to keep rental properties looking great year-round.</p></div>
+      </div>
+    </section>
+
+  </div><!-- /home-tab -->
+
+  <!-- ══ TAB 2: FEEDBACK ══ -->
+  <div id="feedback-tab" class="tab-panel">
+    <div class="form-section">
+      <h2>⭐ Leave Us Feedback</h2>
+      <p class="subtitle">We value your experience. Tell us how your visit went — feedback goes directly into our system.</p>
+      <div class="form-card">
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Your First and Last Name (Name you used with us)<span style="color:#c0392b;">*</span></label>
+            <input type="text" id="fb-client-name" placeholder="First and last name e.g., John Doe"/>
+          </div>
+        </div>
+        <div class="f-row">
+          <div class="f-group">
+            <label>Rating</label>
+            <select class="rating-select" id="fb-rating">
+              <option value="5">⭐⭐⭐⭐⭐ — Excellent (5)</option>
+              <option value="4">⭐⭐⭐⭐ — Good (4)</option>
+              <option value="3">⭐⭐⭐ — Average (3)</option>
+              <option value="2">⭐⭐ — Below Average (2)</option>
+              <option value="1">⭐ — Poor (1)</option>
+            </select>
+          </div>
+          <div class="f-group">
+            <label>Feedback Date</label>
+            <input type="date" id="fb-date"/>
+          </div>
+        </div>
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Comments</label>
+            <textarea id="fb-comments" placeholder="Tell us about your experience — what went well?"></textarea>
+          </div>
+        </div>
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Suggestions (optional)</label>
+            <textarea id="fb-suggestions" placeholder="Any suggestions for how we can improve?"></textarea>
+          </div>
+        </div>
+        <div class="f-actions">
+          <button class="btn-submit" onclick="submitFeedback()">Submit Feedback</button>
+          <button class="btn-clear" onclick="clearFeedback()">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: ESTIMATE REQUEST ══ -->
+  <div id="estimate-tab" class="tab-panel">
+    <div class="form-section">
+      <h2>📋 Request an Estimate</h2>
+      <p class="subtitle">Fill out the form and we'll be in touch to schedule a free on-site estimate. A <strong>Client ID</strong> and <strong>Estimate ID</strong> are automatically created for you when you submit.</p>
+      <div class="form-card">
+        <div class="f-row">
+          <div class="f-group">
+            <label>Your Full Name <span style="color:#c0392b;">*</span></label>
+            <input type="text" id="est-name" placeholder="Full name or company name"/>
+          </div>
+          <div class="f-group">
+            <label>Phone Number</label>
+            <input type="tel" id="est-phone" placeholder="(530) 000-0000"/>
+          </div>
+        </div>
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Email Address</label>
+            <input type="email" id="est-email" placeholder="your@email.com"/>
+          </div>
+        </div>
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Property Address <span style="color:#c0392b;">*</span></label>
+            <input type="text" id="est-address" placeholder="Street address where service is needed"/>
+          </div>
+        </div>
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Service Needed <span style="color:#c0392b;">*</span></label>
+            <textarea id="est-description" placeholder="Describe the work you need (e.g. weekly lawn maintenance, lot clearing, sprinkler repair...)"></textarea>
+          </div>
+        </div>
+        <div class="f-actions">
+          <button class="btn-submit" id="est-submit-btn" onclick="submitEstimate()">Submit Estimate Request</button>
+          <button class="btn-clear" onclick="clearEstimate()">Clear</button>
+        </div>
+        <div id="est-confirmation" style="display:none;margin-top:20px;background:#d4f0bb;border:2px solid #7abb57;border-radius:10px;padding:20px 22px;">
+          <div style="font-size:16px;font-weight:700;color:#2e6318;margin-bottom:12px;">✅ Estimate Request Submitted!</div>
+          <p style="font-size:13px;color:#2e6318;margin-bottom:14px;line-height:1.6;">Your information has been saved. We will contact you shortly to schedule your free estimate.</p>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;">
+            <div style="background:#fff;border-radius:8px;padding:12px 18px;text-align:center;min-width:130px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6a9050;margin-bottom:4px;">Your Client ID</div>
+              <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#3a7d20;" id="conf-client-id">—</div>
+            </div>
+            <div style="background:#fff;border-radius:8px;padding:12px 18px;text-align:center;min-width:130px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6a9050;margin-bottom:4px;">Estimate ID</div>
+              <div style="font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#3a7d20;" id="conf-estimate-id">—</div>
+            </div>
+            <div style="background:#fff;border-radius:8px;padding:12px 18px;text-align:center;flex:1;min-width:160px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6a9050;margin-bottom:4px;">Name on File</div>
+              <div style="font-size:15px;font-weight:700;color:#1a2e10;padding-top:4px;" id="conf-name">—</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:#4a7c42;margin-top:12px;">📌 Save your <strong>Client ID</strong> — reference it when you call us at (530) 710-9500.</p>
+          <button onclick="clearEstimate()" style="margin-top:10px;padding:8px 18px;background:#3a7d20;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">Submit Another Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 4: REFERRAL ══ -->
+  <div id="referral-tab" class="tab-panel">
+    <div class="form-section">
+      <h2>🤝 Refer a Friend</h2>
+      <p class="subtitle">
+        Know someone who could use our services? Enter their name below and we'll reach out to schedule a free estimate.
+        Only the referred person's name is required — we take care of the rest.
+      </p>
+      <div class="form-card">
+
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Contact of Person<span style="color:#c0392b;">*</span></label>
+            <input type="text" id="ref-name" placeholder="Email address or phone number"/>
+            <span style="font-size:11px;color:#999;margin-top:3px;display:block;">
+              This is the only field saved to our database — we will contact them to set up a free estimate.
+            </span>
+          </div>
+        </div>
+
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Your Name (optional — so we know who referred them)</label>
+            <input type="text" id="ref-referrer-name" placeholder="Your name (optional)"/>
+          </div>
+        </div>
+
+        <div class="f-row single">
+          <div class="f-group">
+            <label>Your Client ID (optional)</label>
+            <input type="number" id="ref-referrer-id" placeholder="Your Client ID if you have one" min="1" step="1" oninput="lookupReferrerClient()"/>
+            <span style="font-size:11px;color:#999;margin-top:3px;display:block;">
+              Found on your estimate confirmation. This links the referral to your account.
+            </span>
+            <div id="ref-client-preview" style="display:none;margin-top:8px;background:#f0f9ea;border:1px solid #b8df9f;border-radius:8px;padding:10px 13px;font-size:13px;color:#2d5a27;font-weight:600;"></div>
+          </div>
+        </div>
+
+        <div class="f-actions">
+          <button class="btn-submit" id="ref-submit-btn" onclick="submitReferral()">Submit Referral</button>
+          <button class="btn-clear" onclick="clearReferral()">Clear</button>
+        </div>
+
+        <!-- Confirmation card -->
+        <div id="ref-confirmation" style="display:none;margin-top:20px;background:#d4f0bb;border:2px solid #7abb57;border-radius:10px;padding:20px 22px;">
+          <div style="font-size:16px;font-weight:700;color:#2e6318;margin-bottom:10px;">✅ Referral Submitted!</div>
+          <p style="font-size:13px;color:#2e6318;margin-bottom:14px;line-height:1.6;">
+            Thank you! We've received your referral and will reach out to <strong id="ref-conf-name">—</strong> to schedule a free estimate.
+          </p>
+          <div style="display:flex;gap:14px;flex-wrap:wrap;">
+            <div style="background:#fff;border-radius:8px;padding:12px 16px;text-align:center;min-width:130px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6a9050;margin-bottom:4px;">Referral ID</div>
+              <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:#3a7d20;" id="ref-conf-id">—</div>
+            </div>
+            <div style="background:#fff;border-radius:8px;padding:12px 16px;text-align:center;flex:1;min-width:160px;">
+              <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#6a9050;margin-bottom:4px;">Status</div>
+              <div style="font-size:14px;font-weight:700;color:#3a7d20;padding-top:6px;">Thanks We Will Reach Out!</div>
+            </div>
+          </div>
+          <p style="font-size:12px;color:#4a7c42;margin-top:12px;">📌 Save your Referral ID for your records. Questions? Call us at (530) 710-9500.</p>
+          <button onclick="clearReferral()" style="margin-top:10px;padding:8px 18px;background:#3a7d20;color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">Submit Another Referral</button>
+        </div>
+
+      </div>
+    </div>
+  </div><!-- /referral-tab -->
+
+  <!-- FOOTER -->
+  <div class="footer-wrap">
+    <div class="footer">
+      <div>
+        <h4>A &amp; E Landscaping<br>and Hauling</h4>
+        <p style="font-size:13px;color:rgba(255,255,255,.65);margin-bottom:10px;line-height:1.6;">Serving Redding, CA and surrounding areas.</p>
+        <div class="social-links">
+          <a href="https://facebook.com/aehauling" target="_blank">Facebook</a>
+          <a href="https://www.yelp.com/biz/a-and-e-landscape-and-hauling-redding-4" target="_blank">Yelp</a>
+        </div>
+      </div>
+      <div>
+        <h4>Services</h4>
+        <ul>
+          <li>Yard Maintenance – Full Year</li>
+          <li>Fall and Spring Clean Ups</li>
+          <li>Sprinkler Repairs</li>
+          <li>Lot Clearing</li>
+          <li>Defensible Space Clearing</li>
+        </ul>
+      </div>
+      <div>
+        <h4>Get In Touch</h4>
+        <ul>
+          <li><a href="tel:15307109500">1 (530) 710-9500</a></li>
+          <li><a href="mailto:contact@aelandscape.net">contact@aelandscape.net</a></li>
+          <li style="margin-top:10px;"><a href="/employee-portal" style="color:rgba(255,255,255,.4);font-size:12px;">Employee Portal</a></li>
+          <li><a href="/login" style="color:rgba(255,255,255,.4);font-size:12px;">Manager Login</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">Copyright &copy; 2026 A &amp; E Landscaping and Hauling. All rights reserved.</div>
+  </div>
+
+  <div class="toast" id="ae-toast"></div>
+
+<script>
+function showTab(id,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(btn)btn.classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function showToast(msg,err=false){
+  const t=document.getElementById('ae-toast');
+  t.textContent=msg;t.className='toast'+(err?' error':'');
+  t.style.display='block';setTimeout(()=>t.style.display='none',4000);
+}
+document.getElementById('fb-date').valueAsDate=new Date();
+
+
+async function submitFeedback(){
+  const name = document.getElementById('fb-client-name').value.trim();
+  if(!name){ showToast('Please enter your name.', true); return; }
+
+  const body = {
+    client_id:   null,
+    client_name: name,
+    service_id:  null,
+    rating:      document.getElementById('fb-rating').value,
+    comments:    document.getElementById('fb-comments').value.trim(),
+    suggestions: document.getElementById('fb-suggestions').value.trim()
+  };
+
+  const res = await fetch('/submit/feedback', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+
+  showToast(
+    res.success ? '✅ Thank you, '+name+'! Your feedback has been submitted.' : '❌ '+res.message,
+    !res.success
+  );
+  if(res.success) clearFeedback();
+}
+
+function clearFeedback(){
+  document.getElementById('fb-client-name').value='';
+  document.getElementById('fb-rating').value='5';
+  document.getElementById('fb-comments').value='';
+  document.getElementById('fb-suggestions').value='';
+  document.getElementById('fb-date').valueAsDate=new Date();
+}
+async function submitEstimate(){
+  const name=document.getElementById('est-name').value.trim();
+  const phone=document.getElementById('est-phone').value.trim();
+  const email=document.getElementById('est-email').value.trim();
+  const address=document.getElementById('est-address').value.trim();
+  const desc=document.getElementById('est-description').value.trim();
+  if(!name){showToast('Please enter your full name.',true);return;}
+  if(!address){showToast('Please enter the property address.',true);return;}
+  if(!desc){showToast('Please describe the service you need.',true);return;}
+  const btn=document.getElementById('est-submit-btn');
+  btn.disabled=true;btn.textContent='⏳ Submitting...';
+  const res=await fetch('/submit/estimate-request',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({client_name:name,client_phone:phone,client_email:email,property_address:address,service_description:desc,estimated_cost:0,estimated_labor_hours:0})}).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+  btn.disabled=false;btn.textContent='Submit Estimate Request';
+  if(res.success){
+    document.getElementById('conf-client-id').textContent=res.client_id;
+    document.getElementById('conf-estimate-id').textContent=res.estimate_id;
+    document.getElementById('conf-name').textContent=name;
+    document.getElementById('est-confirmation').style.display='block';
+    document.querySelector('.f-actions').style.display='none';
+  }else{showToast('❌ '+res.message+' — Please call us at (530) 710-9500.',true);}
+}
+function clearEstimate(){
+  ['est-name','est-phone','est-email','est-address','est-description'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('est-confirmation').style.display='none';
+  document.querySelector('.f-actions').style.display='flex';
+}
+
+// ── Referral ────────────────────────────────────────────────
+// Shared client cache (reuses fbClientCache if already loaded)
+async function lookupReferrerClient() {
+  const cid     = document.getElementById('ref-referrer-id').value.trim();
+  const preview = document.getElementById('ref-client-preview');
+  if (!cid) { preview.style.display='none'; return; }
+
+  // Load cache if empty (reuse feedback cache object)
+  if (!Object.keys(fbClientCache).length) {
+    const clients = await fetch('/api/public/clients').then(r=>r.json()).catch(()=>[]);
+    clients.forEach(c => fbClientCache[c.Client_ID] = c.Client_Name);
+  }
+
+  const name = fbClientCache[cid];
+  preview.style.display = 'block';
+  if (name) {
+    preview.style.background  = '#f0f9ea';
+    preview.style.borderColor = '#b8df9f';
+    preview.style.color       = '#2d5a27';
+    preview.innerHTML = `✓ &nbsp;<strong>${name}</strong>`;
+  } else {
+    preview.style.background  = '#fde8e8';
+    preview.style.borderColor = '#f5a0a0';
+    preview.style.color       = '#c0392b';
+    preview.innerHTML = "⚠️ Client ID not found. Leave blank if you don't have one.";
+  }
+}
+
+async function submitReferral() {
+  const refName    = document.getElementById('ref-name').value.trim();
+  const referrerId = document.getElementById('ref-referrer-id').value.trim();
+
+  if (!refName) {
+    showToast('Please enter the name of the person you are referring.', true);
+    return;
+  }
+
+  const btn = document.getElementById('ref-submit-btn');
+  btn.disabled = true; btn.textContent = '⏳ Submitting...';
+
+  const res = await fetch('/submit/referral', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({
+      referee_name: refName,
+      referrer_id:  referrerId || null
+    })
+  }).then(r=>r.json()).catch(()=>({success:false,message:'Network error'}));
+
+  btn.disabled = false; btn.textContent = 'Submit Referral';
+
+  if (res.success) {
+    document.getElementById('ref-conf-name').textContent = refName;
+    document.getElementById('ref-conf-id').textContent   = res.referral_id;
+    document.getElementById('ref-confirmation').style.display = 'block';
+    document.querySelector('#referral-tab .f-actions').style.display = 'none';
+  } else {
+    showToast('❌ ' + res.message, true);
+  }
+}
+
+function clearReferral() {
+  ['ref-name', 'ref-referrer-name', 'ref-referrer-id'].forEach(id => document.getElementById(id).value='');
+  const prev = document.getElementById('ref-client-preview');
+  prev.style.display    = 'none';
+  prev.style.background = '#f0f9ea';
+  prev.style.borderColor = '#b8df9f';
+  prev.style.color      = '#2d5a27';
+  document.getElementById('ref-confirmation').style.display = 'none';
+  document.querySelector('#referral-tab .f-actions').style.display = 'flex';
+}
+
+</script>
+</body>
+</html>
